@@ -1,5 +1,6 @@
 package com.to.service;
 
+import com.to.logic.EditDistanceCalculator;
 import com.to.model.FileDocument;
 import com.to.repository.FileRepository;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,10 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class FileService {
@@ -37,6 +42,9 @@ public class FileService {
 
     private void processFilesInFolder(File folder) throws IOException, NoSuchAlgorithmException {
         for (File file : folder.listFiles()) {
+            if (file.isHidden()) {
+                continue;
+            }
             if (file.isDirectory()) {
                 processFilesInFolder(file);
             } else {
@@ -80,5 +88,49 @@ public class FileService {
             sb.append(String.format("%02x", b));
         }
         return sb.toString();
+    }
+
+    public void deleteAllFiles() {
+        fileRepository.deleteAll();
+    }
+
+    public List<FileDocument> getAllFiles() {
+        return fileRepository.findAll();
+    }
+
+    public List<List<FileDocument>> findDuplicates() {
+        Map<String, List<FileDocument>> groupedByHash = fileRepository.findAll()
+                .stream()
+                .collect(Collectors.groupingBy(FileDocument::getHash));
+
+        return groupedByHash.values().stream()
+                .filter(group -> group.size() > 1)
+                .collect(Collectors.toList());
+    }
+
+    public List<List<FileDocument>> findFileVersions(int threshold) {
+        List<FileDocument> allFiles = fileRepository.findAll();
+        List<List<FileDocument>> versions = new ArrayList<>();
+
+        for (int i = 0; i < allFiles.size(); i++) {
+            FileDocument file1 = allFiles.get(i);
+            List<FileDocument> similarFiles = new ArrayList<>();
+            similarFiles.add(file1);
+
+            for (int j = i + 1; j < allFiles.size(); j++) {
+                FileDocument file2 = allFiles.get(j);
+                int distance = EditDistanceCalculator.calculate(file1.getFileName(), file2.getFileName());
+
+                if (distance <= threshold) {
+                    similarFiles.add(file2);
+                }
+            }
+
+            if (similarFiles.size() > 1) {
+                versions.add(similarFiles);
+            }
+        }
+
+        return versions;
     }
 }
