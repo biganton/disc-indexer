@@ -15,9 +15,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,7 +39,7 @@ public class FileService {
     }
 
     private void processFilesInFolder(File folder) throws IOException, NoSuchAlgorithmException {
-        for (File file : folder.listFiles()) {
+        for (File file : Objects.requireNonNull(folder.listFiles())) {
             if (file.isHidden()) {
                 continue;
             }
@@ -111,23 +109,29 @@ public class FileService {
     public List<List<FileDocument>> findFileVersions(int threshold) {
         List<FileDocument> allFiles = fileRepository.findAll();
         List<List<FileDocument>> versions = new ArrayList<>();
+        Set<FileDocument> processedFiles = new HashSet<>();
 
-        for (int i = 0; i < allFiles.size(); i++) {
-            FileDocument file1 = allFiles.get(i);
+        for (FileDocument file1 : allFiles) {
+            if (processedFiles.contains(file1)) {
+                continue;
+            }
+
             List<FileDocument> similarFiles = new ArrayList<>();
             similarFiles.add(file1);
 
-            for (int j = i + 1; j < allFiles.size(); j++) {
-                FileDocument file2 = allFiles.get(j);
-                int distance = EditDistanceCalculator.calculate(file1.getFileName(), file2.getFileName());
+            for (FileDocument file2 : allFiles) {
+                if (!file1.equals(file2) && !processedFiles.contains(file2)) {
+                    int distance = EditDistanceCalculator.calculate(file1.getFileName(), file2.getFileName());
 
-                if (distance <= threshold) {
-                    similarFiles.add(file2);
+                    if (distance <= threshold) {
+                        similarFiles.add(file2);
+                    }
                 }
             }
 
             if (similarFiles.size() > 1) {
                 versions.add(similarFiles);
+                processedFiles.addAll(similarFiles);
             }
         }
 
