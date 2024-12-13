@@ -13,18 +13,18 @@ import {
 } from '@mui/material';
 import { openFile, handleDelete } from '../actions/fileActions.js';
 
-const fetchVersions = async () => {
-  const res = await fetch('http://localhost:8080/files/versions?threshold=3');
+const fetchLargest = async () => {
+  const res = await fetch('http://localhost:8080/files/largest');
   if (!res.ok) {
-    throw new Error('Failed to fetch versions');
+    throw new Error('Failed to fetch largest files');
   }
   return res.json();
 };
 
-const Versions = () => {
-  const { data, error, isLoading, refetch } = useQuery({
-    queryKey: ['versions'],
-    queryFn: fetchVersions,
+const Largest = () => {
+  const { data, error, isLoading, refetch} = useQuery({
+    queryKey: ['largest'],
+    queryFn: fetchLargest,
   });
 
   if (isLoading) {
@@ -38,13 +38,9 @@ const Versions = () => {
   return (
     <div>
       <Typography variant="h4" gutterBottom>
-        File Versions
+        Largest Files
       </Typography>
-      {data.map((group, index) => (
-        <TableContainer component={Paper} key={index} style={{ marginBottom: '20px' }}>
-          <Typography variant="h6" style={{ padding: '10px' }}>
-            Group {index + 1}
-          </Typography>
+        <TableContainer component={Paper} style={{ marginBottom: '20px' }}>
           <Table>
             <TableHead>
               <TableRow>
@@ -59,7 +55,7 @@ const Versions = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {group.map((file) => (
+              {data.map((file) => (
                 <TableRow key={file.id}>
                   <TableCell>{file.id}</TableCell>
                   <TableCell>{file.fileName}</TableCell>
@@ -90,9 +86,8 @@ const Versions = () => {
             </TableBody>
           </Table>
         </TableContainer>
-      ))}
     </div>
   );
 };
 
-export default Versions;
+export default Largest;

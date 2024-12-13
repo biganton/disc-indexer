@@ -137,4 +137,46 @@ public class FileService {
 
         return versions;
     }
+
+    public List<FileDocument> findLargestFiles(int limit) {
+        return fileRepository.findAll()
+                .stream()
+                .sorted(Comparator.comparingLong(FileDocument::getSize).reversed())
+                .limit(limit)
+                .collect(Collectors.toList());
+    }
+
+    public void openFile(String filePath) throws IOException {
+        if (filePath == null || filePath.isEmpty()) {
+            throw new IllegalArgumentException("File path is required");
+        }
+
+        File file = new File(filePath);
+        if (!file.exists()) {
+            throw new IllegalArgumentException("File does not exist: " + filePath);
+        }
+
+        String os = System.getProperty("os.name").toLowerCase();
+
+        if (os.contains("win")) {
+            Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", file.getAbsolutePath()});
+        } else if (os.contains("mac")) {
+            Runtime.getRuntime().exec(new String[]{"open", file.getAbsolutePath()});
+        } else if (os.contains("nix") || os.contains("nux")) {
+            Runtime.getRuntime().exec(new String[]{"xdg-open", file.getAbsolutePath()});
+        } else {
+            throw new UnsupportedOperationException("Unsupported operating system");
+        }
+    }
+
+    public void deleteFile(String fileId) throws IOException {
+        FileDocument fileDocument = fileRepository.findById(fileId).orElse(null);
+        File file = new File(fileDocument.getFilePath());
+
+        if (file.exists() && !file.delete()) {
+            throw new IOException("Failed to delete file from system");
+        }
+
+        fileRepository.deleteById(fileId);
+    }
 }

@@ -5,9 +5,14 @@ import com.to.service.FileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/files")
@@ -78,7 +83,37 @@ public class FileController {
         return fileService.findFileVersions(threshold);
     }
 
+    @GetMapping("/largest")
+    @Operation(
+            summary = "Find largest files",
+            description = "Returns largest files in a directory."
+    )
+    @ApiResponse(responseCode = "200", description = "List of file largest files retrieved successfully.")
+    public List<FileDocument> getLargestFiles(@RequestParam(defaultValue = "10") int limit) {
+        return fileService.findLargestFiles(limit);
+    }
 
+    @PostMapping("/open")
+    @Operation(
+            summary = "Open file",
+            description = "Opens file"
+    )
+    @ApiResponse(responseCode = "200", description = "File open successfully.")
+    @ApiResponse(responseCode = "500", description = "Could not open a file")
+    public void openFile(@RequestBody Map<String, String> request) throws IOException {
+        String filePath = request.get("filePath");
+        fileService.openFile(filePath);
+    }
 
-
+    @DeleteMapping("/delete")
+    @Operation(
+            summary = "Delete file",
+            description = "Deletes file"
+    )
+    @ApiResponse(responseCode = "200", description = "File deleted successfully.")
+    @ApiResponse(responseCode = "500", description = "Could not delete a file")
+    public void deleteFile(@RequestBody Map<String, String> request) throws IOException {
+        String fileId = request.get("id");
+        fileService.deleteFile(fileId);
+    }
 }
