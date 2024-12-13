@@ -9,7 +9,9 @@ import {
   TableRow,
   Paper,
   Typography,
+  Button,
 } from '@mui/material';
+import { openFile, handleDelete } from '../actions/fileActions.js';
 
 const fetchVersions = async () => {
   const res = await fetch('http://localhost:8080/files/versions?threshold=3');
@@ -20,7 +22,7 @@ const fetchVersions = async () => {
 };
 
 const Versions = () => {
-  const { data, error, isLoading } = useQuery({
+  const { data, error, isLoading, refetch } = useQuery({
     queryKey: ['versions'],
     queryFn: fetchVersions,
   });
@@ -53,6 +55,7 @@ const Versions = () => {
                 <TableCell>Hash</TableCell>
                 <TableCell>Created At</TableCell>
                 <TableCell>Last Modified</TableCell>
+                <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -65,6 +68,23 @@ const Versions = () => {
                   <TableCell>{file.hash}</TableCell>
                   <TableCell>{new Date(file.createdAt).toLocaleString()}</TableCell>
                   <TableCell>{new Date(file.lastModified).toLocaleString()}</TableCell>
+                  <TableCell>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        style={{ margin: '10px' }}
+                        onClick={() => openFile(file.filePath)}
+                    >
+                      Open
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => handleDelete(file.id, refetch)}
+                    >
+                      Delete
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
