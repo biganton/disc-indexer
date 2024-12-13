@@ -18,6 +18,9 @@ const Home = () => {
       <Button component={Link} to="/versions" variant="contained" color="info" style={{ marginLeft: "10px" }}>
         Find Versions
       </Button>
+        <Button component={Link} to="/largest" variant="contained" color="success" style={{ marginLeft: "10px" }}>
+            Find Largest Files
+        </Button>
     </Container>
   );
 };

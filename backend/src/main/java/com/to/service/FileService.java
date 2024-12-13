@@ -138,6 +138,14 @@ public class FileService {
         return versions;
     }
 
+    public List<FileDocument> findLargestFiles(int limit) {
+        return fileRepository.findAll()
+                .stream()
+                .sorted(Comparator.comparingLong(FileDocument::getSize).reversed())
+                .limit(limit)
+                .collect(Collectors.toList());
+    }
+
     public void openFile(String filePath) throws IOException {
         if (filePath == null || filePath.isEmpty()) {
             throw new IllegalArgumentException("File path is required");

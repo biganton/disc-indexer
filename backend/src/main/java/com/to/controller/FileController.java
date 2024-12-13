@@ -83,6 +83,16 @@ public class FileController {
         return fileService.findFileVersions(threshold);
     }
 
+    @GetMapping("/largest")
+    @Operation(
+            summary = "Find largest files",
+            description = "Returns largest files in a directory."
+    )
+    @ApiResponse(responseCode = "200", description = "List of file largest files retrieved successfully.")
+    public List<FileDocument> getLargestFiles(@RequestParam(defaultValue = "10") int limit) {
+        return fileService.findLargestFiles(limit);
+    }
+
     @PostMapping("/open")
     @Operation(
             summary = "Open file",
