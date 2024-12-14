@@ -73,7 +73,10 @@ class FileServiceTest {
         FileDocument file3 = new FileDocument();
         file3.setFileName("file2.txt");
 
-        List<FileDocument> allFiles = List.of(file1, file2, file3);
+        FileDocument file4 = new FileDocument();
+        file4.setFileName("file-kopia.txt");
+
+        List<FileDocument> allFiles = List.of(file1, file2, file3, file4);
         Mockito.when(fileRepository.findAll()).thenReturn(allFiles);
 
         // when
@@ -81,9 +84,10 @@ class FileServiceTest {
 
         // then
         Assertions.assertEquals(1, versions.size());
-        Assertions.assertEquals(2, versions.getFirst().size());
+        Assertions.assertEquals(3, versions.getFirst().size());
         Assertions.assertTrue(versions.getFirst().contains(file1));
         Assertions.assertTrue(versions.getFirst().contains(file3));
+        Assertions.assertTrue(versions.getFirst().contains(file4));
     }
 
     @Test

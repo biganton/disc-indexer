@@ -50,6 +50,9 @@ public class FileAnalysisService {
 
             for (FileDocument file2 : allFiles) {
                 if (!file1.equals(file2) && !processedFiles.contains(file2)) {
+                    if (file2.getFileName().contains("kopia")) { // TODO expand this concept, the main rule is to replace some keywords with empty space and then calculate distance
+                        file2.setFileName(file2.getFileName().replace("kopia", ""));
+                    }
                     int distance = EditDistanceCalculator.calculate(file1.getFileName(), file2.getFileName());
                     if (distance <= threshold) {
                         similarFiles.add(file2);
