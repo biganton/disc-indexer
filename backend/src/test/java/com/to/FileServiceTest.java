@@ -2,11 +2,14 @@ package com.to;
 
 import com.to.model.FileDocument;
 import com.to.repository.FileRepository;
+import com.to.service.FileAnalysisService;
+import com.to.service.FileManagementService;
+import com.to.service.FileProcessingService;
 import com.to.service.FileService;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -19,8 +22,15 @@ class FileServiceTest {
     @Mock
     private FileRepository fileRepository;
 
-    @InjectMocks
     private FileService fileService;
+
+    @BeforeEach
+    void setUp() {
+        FileAnalysisService fileAnalysisService = Mockito.spy(new FileAnalysisService(fileRepository));
+        FileProcessingService fileProcessingService = Mockito.spy(new FileProcessingService(fileRepository));
+        FileManagementService fileManagementService = Mockito.spy(new FileManagementService(fileRepository));
+        fileService = new FileService(fileProcessingService, fileManagementService, fileAnalysisService);
+    }
 
     @Test
     void testFindDuplicates() {
@@ -38,6 +48,7 @@ class FileServiceTest {
         file3.setFileName("file3.txt");
 
         List<FileDocument> allFiles = List.of(file1, file2, file3);
+
         Mockito.when(fileRepository.findAll()).thenReturn(allFiles);
 
         // when
@@ -62,7 +73,10 @@ class FileServiceTest {
         FileDocument file3 = new FileDocument();
         file3.setFileName("file2.txt");
 
-        List<FileDocument> allFiles = List.of(file1, file2, file3);
+        FileDocument file4 = new FileDocument();
+        file4.setFileName("file-kopia.txt");
+
+        List<FileDocument> allFiles = List.of(file1, file2, file3, file4);
         Mockito.when(fileRepository.findAll()).thenReturn(allFiles);
 
         // when
@@ -70,9 +84,46 @@ class FileServiceTest {
 
         // then
         Assertions.assertEquals(1, versions.size());
-        Assertions.assertEquals(2, versions.getFirst().size());
+        Assertions.assertEquals(3, versions.getFirst().size());
         Assertions.assertTrue(versions.getFirst().contains(file1));
         Assertions.assertTrue(versions.getFirst().contains(file3));
+        Assertions.assertTrue(versions.getFirst().contains(file4));
     }
 
+    @Test
+    void testFindLargestFiles() {
+        //given
+        FileDocument file1 = new FileDocument();
+        file1.setFileName("file.txt");
+        file1.setSize(10);
+
+        FileDocument file2 = new FileDocument();
+        file2.setFileName("file.txt");
+        file2.setSize(20);
+
+        FileDocument file3 = new FileDocument();
+        file3.setFileName("file.txt");
+        file3.setSize(30);
+
+        FileDocument file4 = new FileDocument();
+        file4.setFileName("file.txt");
+        file4.setSize(30);
+
+        FileDocument file5 = new FileDocument();
+        file5.setFileName("file.txt");
+        file5.setSize(50);
+
+        List<FileDocument> allFiles = List.of(file1, file2, file3, file4, file5);
+        Mockito.when(fileRepository.findAll()).thenReturn(allFiles);
+
+        // when
+        List<FileDocument> biggestFiles = fileService.findLargestFiles(3);
+
+        // then
+        Assertions.assertEquals(3, biggestFiles.size());
+        Assertions.assertEquals(50, biggestFiles.getFirst().getSize());
+        Assertions.assertTrue(biggestFiles.contains(file5));
+        Assertions.assertTrue(biggestFiles.contains(file4));
+        Assertions.assertTrue(biggestFiles.contains(file3));
+    }
 }
