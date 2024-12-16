@@ -1,10 +1,12 @@
 package com.to.service;
 
+import com.to.logic.CSVHandler;
 import com.to.logic.EditDistanceCalculator;
 import com.to.model.FileDocument;
 import com.to.repository.FileRepository;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -39,6 +41,7 @@ public class FileAnalysisService {
         List<FileDocument> allFiles = fileRepository.findAll();
         List<List<FileDocument>> versions = new ArrayList<>();
         Set<FileDocument> processedFiles = new HashSet<>();
+        List<String> keywords = CSVHandler.getKeywords();
 
         for (FileDocument file1 : allFiles) {
             if (processedFiles.contains(file1)) {
@@ -50,9 +53,10 @@ public class FileAnalysisService {
 
             for (FileDocument file2 : allFiles) {
                 if (!file1.equals(file2) && !processedFiles.contains(file2)) {
-
-                    String name = file2.getFileName().replace("kopia", "");
-// TODO expand this concept, the main rule is to replace some keywords with empty space and then calculate distance
+                    String name = file2.getFileName();
+                    for (String word : keywords) {
+                        name = name.replace(word, "");
+                    }
                     int distance = EditDistanceCalculator.calculate(file1.getFileName(), name);
                     if (distance <= threshold) {
                         similarFiles.add(file2);
