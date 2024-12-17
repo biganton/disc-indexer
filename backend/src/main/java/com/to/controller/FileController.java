@@ -115,6 +115,18 @@ public class FileController {
         fileService.deleteFile(fileId);
     }
 
+    @PostMapping("/move")
+    @Operation(
+            summary = "Moves file",
+            description = "Changes the file's path"
+    )
+    //public void moveFile(@RequestBody Map<String, String> request) throws IOException {
+    public void moveFile(@RequestParam String filePath, @RequestParam String destinationPath) throws IOException {
+        //String filePath = request.get("filePath");
+        //String destinationPath = request.get("destinationPath");
+        fileService.moveFile(filePath, destinationPath);
+    }
+
     @PostMapping("/duplicates/move-to-grouped-directories")
     @Operation(
             summary = "Move duplicate files to grouped directories",

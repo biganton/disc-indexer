@@ -6,6 +6,10 @@ import com.to.repository.FileRepository;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 @Service
@@ -52,6 +56,30 @@ public class FileManagementService {
         }
 
         fileRepository.deleteById(fileId);
+    }
+
+    public void moveFile(String filePath, String destinationPath) throws IOException {
+        if (filePath == null || filePath.isEmpty()) {
+            throw new IllegalArgumentException("File path is required");
+        }
+        if (destinationPath == null || destinationPath.isEmpty()) {
+            throw new IllegalArgumentException("Destination path is required");
+        }
+
+        File file = new File(filePath);
+
+        if (!file.exists()) {
+            throw new IllegalArgumentException("File does not exist: " + filePath);
+        }
+
+        Path path = Paths.get(filePath);
+        Path fileName = path.getFileName();
+
+        try {
+            Files.move(path, Path.of(destinationPath).resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public List<FileDocument> getAllFiles() {

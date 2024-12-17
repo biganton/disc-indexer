@@ -55,6 +55,10 @@ public class FileService {
         fileManagementService.deleteFile(fileId);
     }
 
+    public void moveFile(String filePath, String destinationPath) throws IOException {
+        fileManagementService.moveFile(filePath, destinationPath);
+    }
+
     public void moveDuplicatesToGroupedDirectories(String targetDirectoryPath) throws IOException {
         List<List<FileDocument>> duplicateGroups = fileAnalysisService.findDuplicates();
 
