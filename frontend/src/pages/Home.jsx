@@ -7,7 +7,7 @@ const Home = () => {
     <Container>
       <Typography variant="h4" gutterBottom>Welcome to the File Manager</Typography>
       <Button component={Link} to="/scan" variant="contained" color="primary">
-        Scan Folder
+        Scan Directory
       </Button>
       <Button component={Link} to="/files" variant="contained" color="secondary" style={{ marginLeft: "10px" }}>
         View Files

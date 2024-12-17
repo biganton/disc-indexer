@@ -21,10 +21,10 @@ public class FileService {
         this.fileAnalysisService = fileAnalysisService;
     }
 
-    public void processFolder(String folderPath) throws IOException, NoSuchAlgorithmException {
+    public void processDirectory(String directoryPath) throws IOException, NoSuchAlgorithmException {
         fileManagementService.deleteAllFiles();
-        File folder = new File(folderPath);
-        fileProcessingService.processFolder(folder);
+        File directory = new File(directoryPath);
+        fileProcessingService.processDirectory(directory);
     }
 
     public void deleteAllFiles() {
@@ -53,5 +53,29 @@ public class FileService {
 
     public void deleteFile(String fileId) throws IOException {
         fileManagementService.deleteFile(fileId);
+    }
+
+    public void moveDuplicatesToGroupedDirectories(String targetDirectoryPath) throws IOException {
+        List<List<FileDocument>> duplicateGroups = fileAnalysisService.findDuplicates();
+
+        for (int i = 0; i < duplicateGroups.size(); i++) {
+            List<FileDocument> group = duplicateGroups.get(i);
+            String groupDirectoryPath = targetDirectoryPath + "/duplicates" + (i + 1);
+            fileManagementService.moveFilesToDirectory(groupDirectoryPath, group);
+        }
+    }
+
+    public void moveVersionsToGroupedDirectories(String targetDirectoryPath, int threshold) throws IOException {
+        List<List<FileDocument>> versionGroups = fileAnalysisService.findFileVersions(threshold);
+
+        for (int i = 0; i < versionGroups.size(); i++) {
+            List<FileDocument> group = versionGroups.get(i);
+            String groupDirectoryPath = targetDirectoryPath + "/versions" + (i + 1);
+            fileManagementService.moveFilesToDirectory(groupDirectoryPath, group);
+        }
+    }
+
+    public void archiveDirectory(String directoryPath, String targetDirectoryPath) {
+        fileManagementService.archiveDirectory(directoryPath, targetDirectoryPath);
     }
 }

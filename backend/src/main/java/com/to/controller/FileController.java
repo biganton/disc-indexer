@@ -8,8 +8,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.awt.*;
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -30,11 +28,11 @@ public class FileController {
     }
 
     @PostMapping("/scan")
-    @Operation(summary = "Scan folder", description = "Scans a folder and saves file data to the database.")
-    @ApiResponse(responseCode = "200", description = "Folder scanned successfully")
-    public String scanFolder(@RequestParam String folderPath) {
+    @Operation(summary = "Scan directory", description = "Scans a directory and saves file data to the database.")
+    @ApiResponse(responseCode = "200", description = "Directory scanned successfully")
+    public String scanDirectory(@RequestParam String directoryPath) {
         try {
-            fileService.processFolder(folderPath);
+            fileService.processDirectory(directoryPath);
             return "Directory scanned successfully!";
         } catch (Exception e) {
             return "Error: " + e.getMessage();
@@ -115,5 +113,48 @@ public class FileController {
     public void deleteFile(@RequestBody Map<String, String> request) throws IOException {
         String fileId = request.get("id");
         fileService.deleteFile(fileId);
+    }
+
+    @PostMapping("/duplicates/move-to-grouped-directories")
+    @Operation(
+            summary = "Move duplicate files to grouped directories",
+            description = "Moves each group of duplicate files to its own directory under the target path."
+    )
+    public ResponseEntity<String> moveDuplicatesToGroupedDirectories(@RequestParam String targetDirectoryPath) {
+        try {
+            fileService.moveDuplicatesToGroupedDirectories(targetDirectoryPath);
+            return ResponseEntity.ok("Duplicates moved to grouped directories successfully!");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/versions/move-to-grouped-directories")
+    @Operation(
+            summary = "Move file versions to grouped directories",
+            description = "Moves each group of file versions to its own directory under the target path."
+    )
+    public ResponseEntity<String> moveVersionsToGroupedDirectories(@RequestParam String targetDirectoryPath,
+                                                               @RequestParam(defaultValue = "3") int threshold) {
+        try {
+            fileService.moveVersionsToGroupedDirectories(targetDirectoryPath, threshold);
+            return ResponseEntity.ok("File versions moved to grouped directories successfully!");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/archive")
+    @Operation(
+            summary = "Archives files",
+            description = "Archives files from some directory into new path"
+    )
+    public ResponseEntity<String> archiveDirectory(@RequestParam String directoryPath, @RequestParam String targetDirectoryPath) {
+        try {
+            fileService.archiveDirectory(directoryPath, targetDirectoryPath);
+            return ResponseEntity.ok("The directory has been archived!");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
+        }
     }
 }

@@ -23,16 +23,16 @@ public class FileProcessingService {
         this.fileRepository = fileRepository;
     }
 
-    public void processFolder(File folder) throws IOException, NoSuchAlgorithmException {
-        if (!folder.exists() || !folder.isDirectory()) {
+    public void processDirectory(File directory) throws IOException, NoSuchAlgorithmException {
+        if (!directory.exists() || !directory.isDirectory()) {
             throw new IllegalArgumentException("Given path is not a directory!");
         }
 
-        for (File file : folder.listFiles()) {
+        for (File file : directory.listFiles()) {
             if (file.isHidden()) continue;
 
             if (file.isDirectory()) {
-                processFolder(file);
+                processDirectory(file);
             } else {
                 FileDocument fileDocument = createFileDocument(file);
                 fileRepository.save(fileDocument);

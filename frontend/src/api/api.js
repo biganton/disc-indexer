@@ -9,9 +9,9 @@ export const fetchFiles = async () => {
   return response.data;
 };
 
-export const scanFolder = async (folderPath) => {
+export const scanFolder = async (directoryPath) => {
   const response = await api.post("/scan", null, {
-    params: { folderPath },
+    params: { directoryPath },
   });
   return response.data;
 };
