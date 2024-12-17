@@ -74,4 +74,8 @@ public class FileService {
             fileManagementService.moveFilesToDirectory(groupDirectoryPath, group);
         }
     }
+
+    public void archiveDirectory(String directoryPath, String targetDirectoryPath) {
+        fileManagementService.archiveDirectory(directoryPath, targetDirectoryPath);
+    }
 }

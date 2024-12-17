@@ -143,4 +143,18 @@ public class FileController {
             return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
     }
+
+    @PostMapping("/archive")
+    @Operation(
+            summary = "Archives files",
+            description = "Archives files from some directory into new path"
+    )
+    public ResponseEntity<String> archiveDirectory(@RequestParam String directoryPath, @RequestParam String targetDirectoryPath) {
+        try {
+            fileService.archiveDirectory(directoryPath, targetDirectoryPath);
+            return ResponseEntity.ok("The directory has been archived!");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
+        }
+    }
 }

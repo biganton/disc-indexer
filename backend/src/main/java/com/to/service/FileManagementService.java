@@ -1,5 +1,6 @@
 package com.to.service;
 
+import com.to.logic.ZipArchiver;
 import com.to.model.FileDocument;
 import com.to.repository.FileRepository;
 import org.springframework.stereotype.Service;
@@ -72,6 +73,15 @@ public class FileManagementService {
             } else {
                 throw new IOException("Failed to move file: " + file.getAbsolutePath());
             }
+        }
+    }
+
+    public void archiveDirectory(String directoryPath, String targetDirectoryPath) {
+        ZipArchiver zipArchiver = new ZipArchiver();
+        try {
+            zipArchiver.zipFolder(directoryPath, targetDirectoryPath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }
