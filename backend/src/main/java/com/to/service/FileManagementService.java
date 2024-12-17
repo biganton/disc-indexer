@@ -4,8 +4,7 @@ import com.to.model.FileDocument;
 import com.to.repository.FileRepository;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.List;
 
 @Service
@@ -56,5 +55,23 @@ public class FileManagementService {
 
     public List<FileDocument> getAllFiles() {
         return fileRepository.findAll();
+    }
+
+    public void moveFilesToDirectory(String targetDirectoryPath, List<FileDocument> files) throws IOException {
+        File targetDirectory = new File(targetDirectoryPath);
+        if (!targetDirectory.exists() && !targetDirectory.mkdirs()) {
+            throw new IOException("Failed to create directory: " + targetDirectoryPath);
+        }
+
+        for (FileDocument fileDocument : files) {
+            File file = new File(fileDocument.getFilePath());
+            File newFile = new File(targetDirectoryPath, file.getName());
+            if (file.renameTo(newFile)) {
+                fileDocument.setFilePath(targetDirectoryPath);
+                fileRepository.save(fileDocument);
+            } else {
+                throw new IOException("Failed to move file: " + file.getAbsolutePath());
+            }
+        }
     }
 }
