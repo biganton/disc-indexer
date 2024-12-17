@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -137,6 +138,30 @@ class FileServiceTest {
         Assertions.assertTrue(biggestFiles.contains(file5));
         Assertions.assertTrue(biggestFiles.contains(file4));
         Assertions.assertTrue(biggestFiles.contains(file3));
+    }
+
+    @Test
+    void testMoveFile() throws IOException{
+        // given
+        Path sourceDir = tempDir.resolve("source");
+        Path nestedDir = sourceDir.resolve("nested");
+        Files.createDirectory(sourceDir);
+        Files.createDirectory(nestedDir);
+        Files.writeString(sourceDir.resolve("file1.txt"), "Sample file");
+
+        FileDocument file1 = new FileDocument();
+        file1.setFileName("file1.txt");
+        file1.setId("1234");
+        file1.setFilePath(sourceDir.resolve("file1.txt").toString());
+        Mockito.when(fileRepository.findAll()).thenReturn(List.of(file1));
+        Mockito.when(fileRepository.findById(file1.getId())).thenReturn(Optional.of(file1));
+
+        // when
+        fileService.moveFile(sourceDir.resolve("file1.txt").toString(), nestedDir.toString(), "1234");
+
+        // then
+        List<FileDocument> allFiles = fileRepository.findAll();
+        Assertions.assertEquals(nestedDir.resolve("file1.txt").toString(), allFiles.getFirst().getFilePath());
     }
 
     @Test

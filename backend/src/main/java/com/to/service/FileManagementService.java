@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class FileManagementService {
@@ -58,7 +59,7 @@ public class FileManagementService {
         fileRepository.deleteById(fileId);
     }
 
-    public void moveFile(String filePath, String destinationPath) throws IOException {
+    public void moveFile(String filePath, String destinationPath, String fileId) throws IOException {
         if (filePath == null || filePath.isEmpty()) {
             throw new IllegalArgumentException("File path is required");
         }
@@ -75,11 +76,23 @@ public class FileManagementService {
         Path path = Paths.get(filePath);
         Path fileName = path.getFileName();
 
+        Optional<FileDocument> fileDocument = fileRepository.findById(fileId);
+
+        if (fileDocument.isEmpty()) {
+            throw new IllegalArgumentException("File not found");
+        }
+
+        Path newPath = Path.of(destinationPath).resolve(fileName);
+
         try {
-            Files.move(path, Path.of(destinationPath).resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
+            Files.move(path, newPath, StandardCopyOption.REPLACE_EXISTING);
+            FileDocument fileToSave = fileDocument.get();
+            fileToSave.setFilePath(newPath.toString());
+            fileRepository.save(fileToSave);
         } catch (IOException e) {
             e.printStackTrace();
         }
+
     }
 
     public List<FileDocument> getAllFiles() {

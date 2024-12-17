@@ -121,10 +121,10 @@ public class FileController {
             description = "Changes the file's path"
     )
     //public void moveFile(@RequestBody Map<String, String> request) throws IOException {
-    public void moveFile(@RequestParam String filePath, @RequestParam String destinationPath) throws IOException {
+    public void moveFile(@RequestParam String filePath, @RequestParam String destinationPath, @RequestParam String fileId) throws IOException {
         //String filePath = request.get("filePath");
         //String destinationPath = request.get("destinationPath");
-        fileService.moveFile(filePath, destinationPath);
+        fileService.moveFile(filePath, destinationPath, fileId);
     }
 
     @PostMapping("/duplicates/move-to-grouped-directories")
