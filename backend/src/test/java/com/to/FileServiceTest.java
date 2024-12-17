@@ -10,11 +10,20 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 @ExtendWith(MockitoExtension.class)
 class FileServiceTest {
@@ -23,6 +32,9 @@ class FileServiceTest {
     private FileRepository fileRepository;
 
     private FileService fileService;
+
+    @TempDir
+    Path tempDir;
 
     @BeforeEach
     void setUp() {
@@ -125,5 +137,32 @@ class FileServiceTest {
         Assertions.assertTrue(biggestFiles.contains(file5));
         Assertions.assertTrue(biggestFiles.contains(file4));
         Assertions.assertTrue(biggestFiles.contains(file3));
+    }
+
+    @Test
+    void testArchiving() throws IOException {
+        // given
+        Path sourceDir = tempDir.resolve("source");
+        Files.createDirectory(sourceDir);
+
+        Files.writeString(sourceDir.resolve("file1.txt"), "Hello, world!");
+        Files.writeString(sourceDir.resolve("file2.txt"), "Test data");
+
+        Path zipFilePath = tempDir.resolve("archive.zip");
+
+        // when
+        fileService.archiveDirectory(sourceDir.toString(), zipFilePath.toString());
+
+        // then
+        try (ZipFile zipFile = new ZipFile(zipFilePath.toFile())) {
+//            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+//            while(entries.hasMoreElements()){
+//                System.out.println(entries.nextElement());
+//            }
+            Path dirPart = Path.of("source");
+            Assertions.assertNotNull(zipFile.getEntry(String.valueOf(dirPart.resolve("file1.txt"))));
+            Assertions.assertNotNull(zipFile.getEntry(String.valueOf(dirPart.resolve("file2.txt"))));
+            Assertions.assertEquals(3, zipFile.size());
+        }
     }
 }
