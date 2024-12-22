@@ -57,22 +57,16 @@ public class FileService {
 
     public void moveDuplicatesToGroupedDirectories(String targetDirectoryPath) throws IOException {
         List<List<FileDocument>> duplicateGroups = fileAnalysisService.findDuplicates();
-
-        for (int i = 0; i < duplicateGroups.size(); i++) {
-            List<FileDocument> group = duplicateGroups.get(i);
-            String groupDirectoryPath = targetDirectoryPath + "/duplicates" + (i + 1);
-            fileManagementService.moveFilesToDirectory(groupDirectoryPath, group);
-        }
+        fileManagementService.moveDuplicatesToGroupedDirectories(duplicateGroups, targetDirectoryPath);
     }
 
     public void moveVersionsToGroupedDirectories(String targetDirectoryPath, int threshold) throws IOException {
         List<List<FileDocument>> versionGroups = fileAnalysisService.findFileVersions(threshold);
+        fileManagementService.moveVersionsToGroupedDirectories(versionGroups, targetDirectoryPath);
+    }
 
-        for (int i = 0; i < versionGroups.size(); i++) {
-            List<FileDocument> group = versionGroups.get(i);
-            String groupDirectoryPath = targetDirectoryPath + "/versions" + (i + 1);
-            fileManagementService.moveFilesToDirectory(groupDirectoryPath, group);
-        }
+    public void moveSelectedFilesToDirectory(List<String> fileIds, String targetDirectoryPath) throws IOException {
+        fileManagementService.moveFilesToDirectory(fileIds, targetDirectoryPath);
     }
 
     public void archiveDirectory(String directoryPath, String targetDirectoryPath) {

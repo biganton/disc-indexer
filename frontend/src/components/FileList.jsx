@@ -1,6 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Typography, } from '@mui/material';
+import { openFile, handleDelete } from '../actions/fileActions.js';
 
 const fetchFiles = async () => {
   const res = await fetch('http://localhost:8080/files/all');
@@ -26,6 +27,9 @@ const FileList = () => {
 
   return (
     <TableContainer component={Paper}>
+      <Typography variant="h4" gutterBottom>
+       All Files
+    </Typography>
       <Table>
         <TableHead>
           <TableRow>
@@ -36,6 +40,7 @@ const FileList = () => {
             <TableCell>Hash</TableCell>
             <TableCell>Created At</TableCell>
             <TableCell>Last Modified</TableCell>
+            <TableCell>Actions</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -48,6 +53,23 @@ const FileList = () => {
               <TableCell>{file.hash}</TableCell>
               <TableCell>{new Date(file.createdAt).toLocaleString()}</TableCell>
               <TableCell>{new Date(file.lastModified).toLocaleString()}</TableCell>
+              <TableCell>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        style={{ margin: '10px' }}
+                        onClick={() => openFile(file.filePath)}
+                    >
+                      Open
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => handleDelete(file.id, refetch)}
+                    >
+                      Delete
+                    </Button>
+                  </TableCell>
             </TableRow>
           ))}
         </TableBody>

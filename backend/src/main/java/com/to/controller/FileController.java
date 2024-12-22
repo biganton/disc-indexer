@@ -144,6 +144,30 @@ public class FileController {
         }
     }
 
+    @PostMapping("/move-to-directory")
+    @Operation(
+            summary = "Move selected files to a grouped directory",
+            description = "Moves the selected files to a specified directory."
+    )
+    public ResponseEntity<String> moveSelectedFilesToDirectory(
+            @RequestBody Map<String, Object> request) {
+
+        List<String> fileIds = (List<String>) request.get("fileIds");
+        String targetDirectoryPath = (String) request.get("targetDirectoryPath");
+
+        if (fileIds == null || fileIds.isEmpty() || targetDirectoryPath == null || targetDirectoryPath.isEmpty()) {
+            return ResponseEntity.badRequest().body("Missing required fields: fileIds or targetDirectoryPath");
+        }
+
+        try {
+            fileService.moveSelectedFilesToDirectory(fileIds, targetDirectoryPath);
+            return ResponseEntity.ok("Files moved to the specified directory successfully!");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
+        }
+    }
+
+
     @PostMapping("/archive")
     @Operation(
             summary = "Archives files",
