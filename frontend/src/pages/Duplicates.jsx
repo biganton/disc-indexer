@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Table,
@@ -10,6 +10,7 @@ import {
   Paper,
   Typography,
   Button,
+  Checkbox,
 } from '@mui/material';
 import { openFile, handleDelete } from '../actions/fileActions.js';
 
@@ -26,6 +27,38 @@ const Duplicates = () => {
     queryKey: ['duplicates'],
     queryFn: fetchDuplicates,
   });
+
+  const [selectedFiles, setSelectedFiles] = useState([]);
+
+  const toggleFileSelection = (fileId) => {
+    setSelectedFiles((prevSelected) =>
+      prevSelected.includes(fileId)
+        ? prevSelected.filter((id) => id !== fileId)
+        : [...prevSelected, fileId]
+    );
+  };
+
+  const handleMoveFiles = async (targetDirectoryPath) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/files/move-to-directory`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fileIds: selectedFiles, targetDirectoryPath }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+
+      alert('Files moved successfully!');
+      refetch();
+    } catch (err) {
+      alert(`Error: ${err.message}`);
+    }
+  };
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -48,6 +81,7 @@ const Duplicates = () => {
           <Table>
             <TableHead>
               <TableRow>
+                <TableCell>Select</TableCell>
                 <TableCell>ID</TableCell>
                 <TableCell>File Name</TableCell>
                 <TableCell>File Path</TableCell>
@@ -61,6 +95,12 @@ const Duplicates = () => {
             <TableBody>
               {group.map((file) => (
                 <TableRow key={file.id}>
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedFiles.includes(file.id)}
+                      onChange={() => toggleFileSelection(file.id)}
+                    />
+                  </TableCell>
                   <TableCell>{file.id}</TableCell>
                   <TableCell>{file.fileName}</TableCell>
                   <TableCell>{file.filePath}</TableCell>
@@ -91,6 +131,19 @@ const Duplicates = () => {
           </Table>
         </TableContainer>
       ))}
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={() => {
+          const targetDirectoryPath = prompt('Enter target directory path:');
+          if (targetDirectoryPath) {
+            handleMoveFiles(targetDirectoryPath);
+          }
+        }}
+        disabled={selectedFiles.length === 0}
+      >
+        Move Selected Files
+      </Button>
     </div>
   );
 };
