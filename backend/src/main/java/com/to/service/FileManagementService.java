@@ -68,11 +68,35 @@ public class FileManagementService {
             File file = new File(fileDocument.getFilePath());
             File newFile = new File(targetDirectoryPath, file.getName());
             if (file.renameTo(newFile)) {
-                fileDocument.setFilePath(targetDirectoryPath);
+                fileDocument.setFilePath(newFile.getAbsolutePath());
                 fileRepository.save(fileDocument);
             } else {
                 throw new IOException("Failed to move file: " + file.getAbsolutePath());
             }
+        }
+    }
+
+    public void moveFilesToDirectory(List<String> fileIds, String targetDirectoryPath) throws IOException {
+        List<FileDocument> selectedFiles = fileRepository.findAllById(fileIds);
+
+        if (selectedFiles.isEmpty()) {
+            throw new IllegalArgumentException("No files found with the provided IDs.");
+        }
+        moveFilesToDirectory(targetDirectoryPath, selectedFiles);
+    }
+
+    public void moveDuplicatesToGroupedDirectories( List<List<FileDocument>> duplicateGroups, String targetDirectoryPath) throws IOException {
+        for (int i = 0; i < duplicateGroups.size(); i++) {
+            List<FileDocument> group = duplicateGroups.get(i);
+            String groupDirectoryPath = targetDirectoryPath + "/duplicates" + (i + 1);
+            moveFilesToDirectory(groupDirectoryPath, group);
+        }
+    }
+    public void moveVersionsToGroupedDirectories( List<List<FileDocument>> versionGroups, String targetDirectoryPath) throws IOException {
+        for (int i = 0; i < versionGroups.size(); i++) {
+            List<FileDocument> group = versionGroups.get(i);
+            String groupDirectoryPath = targetDirectoryPath + "/versions" + (i + 1);
+            moveFilesToDirectory(groupDirectoryPath, group);
         }
     }
 
