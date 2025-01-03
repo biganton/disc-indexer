@@ -194,6 +194,42 @@ class FileServiceTest {
         Assertions.assertTrue(targetDirectory.isDirectory());
         Assertions.assertTrue(new File(targetDir + "/file1.txt").exists());
         Assertions.assertTrue(new File(targetDir + "/file2.txt").exists());
+    }
 
+    @Test
+    void testDeleteFile() throws IOException {
+        // given
+        Path sourceDir = tempDir.resolve("source");
+        Files.createDirectory(sourceDir);
+
+        file1.setId("1");
+        file1.setFileName("file1.txt");
+        file1.setFilePath(sourceDir.resolve("file1.txt").toString());
+
+        Files.writeString(sourceDir.resolve("file1.txt"), "Hello, world!");
+
+        Mockito.when(fileRepository.findById(file1.getId())).thenReturn(java.util.Optional.of(file1));
+
+        // when
+        fileService.deleteFile(file1.getId());
+
+        // then
+        Assertions.assertFalse(Files.exists(sourceDir.resolve("file1.txt")));
+    }
+
+    @Test
+    void testOpenFile() throws IOException {
+        // given
+        Path sourceDir = tempDir.resolve("source");
+        Files.createDirectory(sourceDir);
+        Files.writeString(sourceDir.resolve("file1.txt"), "Hello, world!");
+
+
+        // when
+        fileService.openFile(sourceDir.resolve("file1.txt").toString());
+
+        // then
+        Assertions.assertTrue(Files.exists(sourceDir.resolve("file1.txt")));
+        Assertions.assertDoesNotThrow(() -> fileService.openFile(sourceDir.resolve("file1.txt").toString()));
     }
 }
