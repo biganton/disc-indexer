@@ -37,14 +37,22 @@ public class ZipArchiver {
             }
             return;
         }
-        FileInputStream fis = new FileInputStream(fileToZip);
-        ZipEntry zipEntry = new ZipEntry(fileName);
-        zipOut.putNextEntry(zipEntry);
-        byte[] bytes = new byte[1024];
-        int length;
-        while ((length = fis.read(bytes)) >= 0) {
-            zipOut.write(bytes, 0, length);
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(fileToZip);
+            ZipEntry zipEntry = new ZipEntry(fileName);
+            zipOut.putNextEntry(zipEntry);
+            byte[] bytes = new byte[1024];
+            int length;
+            while ((length = fis.read(bytes)) >= 0) {
+                zipOut.write(bytes, 0, length);
+            }
+        } catch (IOException e) {
+            throw new IOException("Failed to zip file: " + fileToZip.getName(), e);
+        } finally {
+            zipOut.closeEntry();
+            assert fis != null;
+            fis.close();
         }
-        fis.close();
     }
 }
