@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -20,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.zip.ZipFile;
 
@@ -311,5 +313,60 @@ class FileServiceTest {
         Assertions.assertTrue(Files.exists(sourceDir.resolve("versions1/file1_copy.txt")));
         Assertions.assertTrue(Files.exists(sourceDir.resolve("versions1/file2.txt")));
         Assertions.assertFalse(Files.exists(sourceDir.resolve("versions1/file3123-kopia.txt")));
+    }
+
+    @Test
+    void testDeleteAllFiles() {
+        // given
+        file1.setId("1");
+        file2.setId("2");
+        file3.setId("3");
+
+        List<FileDocument> allFiles = List.of(file1, file2, file3);
+
+        // when
+        fileService.deleteAllFiles();
+
+        // then
+        ArgumentCaptor<FileDocument> fileDocumentCaptor = ArgumentCaptor.forClass(FileDocument.class);
+        Mockito.verify(fileRepository, Mockito.times(1)).deleteAll();
+        Assertions.assertFalse(fileDocumentCaptor.getAllValues().containsAll(allFiles));
+    }
+
+    @Test
+    void testProcessDirectory() throws IOException, NoSuchAlgorithmException {
+        // given
+        Path sourceDir = tempDir.resolve("source");
+        Files.createDirectory(sourceDir);
+        Files.writeString(sourceDir.resolve("file1.txt"), "Hello, world!");
+        Files.writeString(sourceDir.resolve("file2.txt"), "Hello, world!");
+
+        // when
+        fileService.processDirectory(sourceDir.toString());
+
+        // then
+        ArgumentCaptor<FileDocument> fileDocumentCaptor = ArgumentCaptor.forClass(FileDocument.class);
+        Mockito.verify(fileRepository, Mockito.times(2)).save(fileDocumentCaptor.capture());
+        List<FileDocument> savedFiles = fileDocumentCaptor.getAllValues();
+        Assertions.assertEquals(2, savedFiles.size());
+        Assertions.assertTrue(savedFiles.stream().anyMatch(file -> file.getFileName().equals("file1.txt")));
+        Assertions.assertTrue(savedFiles.stream().anyMatch(file -> file.getFileName().equals("file2.txt")));
+    }
+
+    @Test
+    void testGetAllFiles() {
+        // given
+        file1.setId("1");
+        file2.setId("2");
+        file3.setId("3");
+
+        List<FileDocument> allFiles = List.of(file1, file2, file3);
+        Mockito.when(fileRepository.findAll()).thenReturn(allFiles);
+
+        // when
+        List<FileDocument> result = fileService.getAllFiles();
+
+        // then
+        Assertions.assertEquals(allFiles, result);
     }
 }
