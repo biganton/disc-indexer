@@ -232,4 +232,84 @@ class FileServiceTest {
         Assertions.assertTrue(Files.exists(sourceDir.resolve("file1.txt")));
         Assertions.assertDoesNotThrow(() -> fileService.openFile(sourceDir.resolve("file1.txt").toString()));
     }
+
+    @Test
+    void testMoveDuplicatesToGroupedDirectories() throws IOException {
+        // given
+        Path sourceDir = tempDir.resolve("source");
+        Files.createDirectory(sourceDir);
+        Files.writeString(sourceDir.resolve("file1.txt"), "Hello, world!");
+        Files.writeString(sourceDir.resolve("file2.txt"), "Hello, world!");
+
+        file1.setId("1");
+        file1.setFileName("file1.txt");
+        file1.setHash("hash123");
+        file1.setFilePath(sourceDir.resolve("file1.txt").toString());
+
+        file2.setId("2");
+        file2.setFileName("file2.txt");
+        file2.setHash("hash123");
+        file2.setFilePath(sourceDir.resolve("file2.txt").toString());
+
+        file3.setId("3");
+        file3.setFileName("file33131341.txt");
+        file3.setHash("hash45623131");
+        file3.setFilePath(sourceDir.resolve("file33131341.txt").toString());
+
+        List<FileDocument> allFiles = List.of(file1, file2, file3);
+        Mockito.when(fileRepository.findAll()).thenReturn(allFiles);
+
+        // when
+        fileService.moveDuplicatesToGroupedDirectories(sourceDir.toString());
+
+        // then
+        Assertions.assertTrue(Files.exists(sourceDir.resolve("duplicates1/file1.txt")));
+        Assertions.assertTrue(Files.exists(sourceDir.resolve("duplicates1/file2.txt")));
+        Assertions.assertFalse(Files.exists(sourceDir.resolve("duplicates1/file33131341.txt")));
+    }
+
+    @Test
+    void testMoveVersionsToGroupedDirectories() throws IOException {
+        // given
+        Path sourceDir = tempDir.resolve("source");
+        Files.createDirectory(sourceDir);
+        Files.writeString(sourceDir.resolve("file1.txt"), "Hello, world!");
+        Files.writeString(sourceDir.resolve("file1_v1.txt"), "Hello, world!");
+        Files.writeString(sourceDir.resolve("file2.txt"), "Hello, world!");
+        Files.writeString(sourceDir.resolve("file-kopia.txt"), "Hello, world!");
+        Files.writeString(sourceDir.resolve("file1_copy.txt"), "Hello, world!");
+
+        file1.setId("1");
+        file1.setFileName("file1.txt");
+        file1.setFilePath(sourceDir.resolve("file1.txt").toString());
+
+        file2.setId("2");
+        file2.setFileName("file1_v1.txt");
+        file2.setFilePath(sourceDir.resolve("file1_v1.txt").toString());
+
+        file3.setId("3");
+        file3.setFileName("file2.txt");
+        file3.setFilePath(sourceDir.resolve("file2.txt").toString());
+
+        file4.setId("4");
+        file4.setFileName("file3123-kopia.txt");
+        file4.setFilePath(sourceDir.resolve("file3123-kopia.txt").toString());
+
+        file5.setId("5");
+        file5.setFileName("file1_copy.txt");
+        file5.setFilePath(sourceDir.resolve("file1_copy.txt").toString());
+
+        List<FileDocument> allFiles = List.of(file1, file2, file3, file4, file5);
+        Mockito.when(fileRepository.findAll()).thenReturn(allFiles);
+
+        // when
+        fileService.moveVersionsToGroupedDirectories(sourceDir.toString(), 3);
+
+        // then
+        Assertions.assertTrue(Files.exists(sourceDir.resolve("versions1/file1.txt")));
+        Assertions.assertTrue(Files.exists(sourceDir.resolve("versions1/file1_v1.txt")));
+        Assertions.assertTrue(Files.exists(sourceDir.resolve("versions1/file1_copy.txt")));
+        Assertions.assertTrue(Files.exists(sourceDir.resolve("versions1/file2.txt")));
+        Assertions.assertFalse(Files.exists(sourceDir.resolve("versions1/file3123-kopia.txt")));
+    }
 }
