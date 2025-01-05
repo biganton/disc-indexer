@@ -60,6 +60,28 @@ const Duplicates = () => {
     }
   };
 
+  const handleMoveToGroupedDirectories = async (targetDirectoryPath) => {
+    try {
+      const response = await fetch(
+          `http://localhost:8080/files/duplicates/move-to-grouped-directories`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ targetDirectoryPath }),
+          }
+      );
+
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+
+      alert('Files moved successfully!');
+      refetch();
+    } catch (err) {
+      alert(`Error: ${err.message}`);
+    }
+  };
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -132,8 +154,23 @@ const Duplicates = () => {
         </TableContainer>
       ))}
       <Button
+          variant="contained"
+          color="primary"
+          style={{ margin: '10px' }}
+          onClick={() => {
+            const targetDirectoryPath = prompt('Enter target directory path:');
+            if (targetDirectoryPath) {
+              handleMoveToGroupedDirectories(targetDirectoryPath);
+            }
+          }}
+      >
+        Move Files To Grouped Directories
+      </Button>
+
+      <Button
         variant="contained"
         color="primary"
+        style={{ margin: '10px' }}
         onClick={() => {
           const targetDirectoryPath = prompt('Enter target directory path:');
           if (targetDirectoryPath) {

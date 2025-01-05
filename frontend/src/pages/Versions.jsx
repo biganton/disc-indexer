@@ -59,6 +59,30 @@ const Versions = () => {
       alert(`Error: ${err.message}`);
     }
   };
+
+  const handleMoveToGroupedDirectories = async (targetDirectoryPath, threshold = 3) => {
+    try {
+      const response = await fetch(
+          `http://localhost:8080/files/versions/move-to-grouped-directories`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ targetDirectoryPath, threshold }),
+          }
+      );
+
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+
+      alert('Files moved successfully!');
+      refetch();
+    } catch (err) {
+      alert(`Error: ${err.message}`);
+    }
+  };
+
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -131,8 +155,24 @@ const Versions = () => {
         </TableContainer>
       ))}
       <Button
+          variant="contained"
+          color="primary"
+          style={{ margin: '10px' }}
+          onClick={() => {
+              const targetDirectoryPath = prompt('Enter target directory path:');
+              const threshold = parseInt(prompt('Enter threshold value (default: 3):'), 10) || 3;
+              if (targetDirectoryPath) {
+                  handleMoveToGroupedDirectories(targetDirectoryPath, threshold);
+              }
+          }}
+      >
+        Move Files To Grouped Directories
+      </Button>
+
+      <Button
         variant="contained"
         color="primary"
+        style={{ margin: '10px' }}
         onClick={() => {
           const targetDirectoryPath = prompt('Enter target directory path:');
           if (targetDirectoryPath) {

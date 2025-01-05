@@ -120,7 +120,11 @@ public class FileController {
             summary = "Move duplicate files to grouped directories",
             description = "Moves each group of duplicate files to its own directory under the target path."
     )
-    public ResponseEntity<String> moveDuplicatesToGroupedDirectories(@RequestParam String targetDirectoryPath) {
+    public ResponseEntity<String> moveDuplicatesToGroupedDirectories(@RequestBody Map<String, String> request) {
+        String targetDirectoryPath = request.get("targetDirectoryPath");
+        if (targetDirectoryPath == null || targetDirectoryPath.isEmpty()) {
+            return ResponseEntity.badRequest().body("Missing required field: targetDirectoryPath");
+        }
         try {
             fileService.moveDuplicatesToGroupedDirectories(targetDirectoryPath);
             return ResponseEntity.ok("Duplicates moved to grouped directories successfully!");
@@ -134,8 +138,14 @@ public class FileController {
             summary = "Move file versions to grouped directories",
             description = "Moves each group of file versions to its own directory under the target path."
     )
-    public ResponseEntity<String> moveVersionsToGroupedDirectories(@RequestParam String targetDirectoryPath,
-                                                               @RequestParam(defaultValue = "3") int threshold) {
+    public ResponseEntity<String> moveVersionsToGroupedDirectories(@RequestBody Map<String, Object> request) {
+        String targetDirectoryPath = (String) request.get("targetDirectoryPath");
+        Integer threshold = (Integer) request.getOrDefault("threshold", 3);
+
+        if (targetDirectoryPath == null || targetDirectoryPath.isEmpty()) {
+            return ResponseEntity.badRequest().body("Missing required field: targetDirectoryPath");
+        }
+
         try {
             fileService.moveVersionsToGroupedDirectories(targetDirectoryPath, threshold);
             return ResponseEntity.ok("File versions moved to grouped directories successfully!");
@@ -143,6 +153,7 @@ public class FileController {
             return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
     }
+
 
     @PostMapping("/move-to-directory")
     @Operation(
