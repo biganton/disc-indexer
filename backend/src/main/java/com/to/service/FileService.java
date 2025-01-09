@@ -66,10 +66,11 @@ public class FileService {
     }
 
     public void moveSelectedFilesToDirectory(List<String> fileIds, String targetDirectoryPath) throws IOException {
-        fileManagementService.moveFilesToDirectory(fileIds, targetDirectoryPath);
+        fileManagementService.moveSelectedFilesToDirectory(fileIds, targetDirectoryPath);
     }
 
-    public void archiveDirectory(String directoryPath, String targetDirectoryPath) {
-        fileManagementService.archiveDirectory(directoryPath, targetDirectoryPath);
+    public void archiveDirectory(String directoryPath) {
+        fileManagementService.archiveDirectory(directoryPath, directoryPath + ".zip");
     }
+
 }

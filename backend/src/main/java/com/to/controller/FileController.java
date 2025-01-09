@@ -120,14 +120,22 @@ public class FileController {
             summary = "Move duplicate files to grouped directories",
             description = "Moves each group of duplicate files to its own directory under the target path."
     )
-    public ResponseEntity<String> moveDuplicatesToGroupedDirectories(@RequestBody Map<String, String> request) {
-        String targetDirectoryPath = request.get("targetDirectoryPath");
+    public ResponseEntity<String> moveDuplicatesToGroupedDirectories(@RequestBody Map<String, Object> request) {
+        String targetDirectoryPath = (String) request.get("targetDirectoryPath");
+        Boolean archive = (Boolean) request.get("archive");
+
         if (targetDirectoryPath == null || targetDirectoryPath.isEmpty()) {
             return ResponseEntity.badRequest().body("Missing required field: targetDirectoryPath");
         }
         try {
             fileService.moveDuplicatesToGroupedDirectories(targetDirectoryPath);
-            return ResponseEntity.ok("Duplicates moved to grouped directories successfully!");
+            if (archive != null && archive) {
+                fileService.archiveDirectory(targetDirectoryPath);
+            }
+            return ResponseEntity.ok(archive != null && archive
+                    ? "Duplicates moved to grouped directories and directory archived successfully!"
+                    : "Duplicates moved to grouped directories successfully!");
+
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
@@ -141,6 +149,7 @@ public class FileController {
     public ResponseEntity<String> moveVersionsToGroupedDirectories(@RequestBody Map<String, Object> request) {
         String targetDirectoryPath = (String) request.get("targetDirectoryPath");
         Integer threshold = (Integer) request.getOrDefault("threshold", 3);
+        Boolean archive = (Boolean) request.get("archive");
 
         if (targetDirectoryPath == null || targetDirectoryPath.isEmpty()) {
             return ResponseEntity.badRequest().body("Missing required field: targetDirectoryPath");
@@ -148,7 +157,12 @@ public class FileController {
 
         try {
             fileService.moveVersionsToGroupedDirectories(targetDirectoryPath, threshold);
-            return ResponseEntity.ok("File versions moved to grouped directories successfully!");
+            if (archive != null && archive) {
+                fileService.archiveDirectory(targetDirectoryPath);
+            }
+            return ResponseEntity.ok(archive != null && archive
+                    ? "Versions moved to grouped directories and directory archived successfully!"
+                    : "Versions moved to grouped directories successfully!");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
@@ -158,13 +172,14 @@ public class FileController {
     @PostMapping("/move-to-directory")
     @Operation(
             summary = "Move selected files to a grouped directory",
-            description = "Moves the selected files to a specified directory."
+            description = "Moves the selected files to a specified directory. Optionally archives the directory."
     )
     public ResponseEntity<String> moveSelectedFilesToDirectory(
             @RequestBody Map<String, Object> request) {
 
         List<String> fileIds = (List<String>) request.get("fileIds");
         String targetDirectoryPath = (String) request.get("targetDirectoryPath");
+        Boolean archive = (Boolean) request.get("archive");
 
         if (fileIds == null || fileIds.isEmpty() || targetDirectoryPath == null || targetDirectoryPath.isEmpty()) {
             return ResponseEntity.badRequest().body("Missing required fields: fileIds or targetDirectoryPath");
@@ -172,21 +187,25 @@ public class FileController {
 
         try {
             fileService.moveSelectedFilesToDirectory(fileIds, targetDirectoryPath);
-            return ResponseEntity.ok("Files moved to the specified directory successfully!");
+            if (archive != null && archive) {
+                fileService.archiveDirectory(targetDirectoryPath);
+            }
+            return ResponseEntity.ok(archive != null && archive
+                    ? "Files moved and directory archived successfully!"
+                    : "Files moved successfully!");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
     }
 
-
     @PostMapping("/archive")
     @Operation(
-            summary = "Archives files",
-            description = "Archives files from some directory into new path"
+    summary = "Archives files",
+    description = "Archives files from some directory into new path"
     )
     public ResponseEntity<String> archiveDirectory(@RequestParam String directoryPath, @RequestParam String targetDirectoryPath) {
         try {
-            fileService.archiveDirectory(directoryPath, targetDirectoryPath);
+            fileService.archiveDirectory(directoryPath);
             return ResponseEntity.ok("The directory has been archived!");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error: " + e.getMessage());
