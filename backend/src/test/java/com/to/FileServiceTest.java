@@ -151,10 +151,10 @@ class FileServiceTest {
         Files.writeString(sourceDir.resolve("file1.txt"), "Hello, world!");
         Files.writeString(sourceDir.resolve("file2.txt"), "Test data");
 
-        Path zipFilePath = tempDir.resolve("archive.zip");
+        Path zipFilePath = tempDir.resolve("source.zip");
 
         // when
-        fileService.archiveDirectory(sourceDir.toString(), zipFilePath.toString());
+        fileService.archiveDirectory(sourceDir.toString());
 
         // then
         try (ZipFile zipFile = new ZipFile(zipFilePath.toFile())) {

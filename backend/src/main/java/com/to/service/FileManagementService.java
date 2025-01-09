@@ -76,7 +76,7 @@ public class FileManagementService {
         }
     }
 
-    public void moveFilesToDirectory(List<String> fileIds, String targetDirectoryPath) throws IOException {
+    public void moveSelectedFilesToDirectory(List<String> fileIds, String targetDirectoryPath) throws IOException {
         List<FileDocument> selectedFiles = fileRepository.findAllById(fileIds);
 
         if (selectedFiles.isEmpty()) {
@@ -103,7 +103,7 @@ public class FileManagementService {
     public void archiveDirectory(String directoryPath, String targetDirectoryPath) {
         ZipArchiver zipArchiver = new ZipArchiver();
         try {
-            zipArchiver.zipFolder(directoryPath, targetDirectoryPath);
+            zipArchiver.zipFolderAndDeleteOriginal(directoryPath, targetDirectoryPath);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -8,10 +8,10 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Typography,
   Button,
 } from '@mui/material';
 import { openFile, handleDelete } from '../actions/fileActions.js';
+import NavHeader from '../components/NavHeader.jsx';
 
 const fetchLargest = async () => {
   const res = await fetch('http://localhost:8080/files/largest');
@@ -36,11 +36,9 @@ const Largest = () => {
   }
 
   return (
-    <div>
-      <Typography variant="h4" gutterBottom>
-        Largest Files
-      </Typography>
-        <TableContainer component={Paper} style={{ marginBottom: '20px' }}>
+      <div>
+        <NavHeader pageName="Largest Files"/>
+        <TableContainer component={Paper} style={{marginBottom: '20px'}}>
           <Table>
             <TableHead>
               <TableRow>
@@ -86,7 +84,7 @@ const Largest = () => {
             </TableBody>
           </Table>
         </TableContainer>
-    </div>
+      </div>
   );
 };
 

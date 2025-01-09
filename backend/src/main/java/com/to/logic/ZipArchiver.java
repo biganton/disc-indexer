@@ -10,11 +10,31 @@ import java.util.zip.ZipOutputStream;
 
 public class ZipArchiver {
 
+    public void zipFolderAndDeleteOriginal(String sourceDirPath, String zipFilePath) throws IOException {
+        File folderToZip = new File(sourceDirPath);
+        zipFolder(sourceDirPath, zipFilePath);
+        deleteFolder(folderToZip);
+    }
+
     public void zipFolder(String sourceDirPath, String zipFilePath) throws IOException {
         FileOutputStream fos = new FileOutputStream(zipFilePath);
         File folderToZip = new File(sourceDirPath);
         try (fos; ZipOutputStream zipOut = new ZipOutputStream(fos)) {
             zipFiles(folderToZip, folderToZip.getName(), zipOut);
+        }
+    }
+
+    private void deleteFolder(File folder) {
+        if (folder.isDirectory()) {
+            File[] files = folder.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    deleteFolder(file);
+                }
+            }
+        }
+        if (!folder.delete()) {
+            throw new RuntimeException("Failed to delete folder: " + folder.getAbsolutePath());
         }
     }
 
