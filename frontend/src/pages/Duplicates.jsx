@@ -13,6 +13,7 @@ import {
   Checkbox,
 } from '@mui/material';
 import { openFile, handleDelete } from '../actions/fileActions.js';
+import NavHeader from "../components/NavHeader.jsx";
 
 const fetchDuplicates = async () => {
   const res = await fetch('http://localhost:8080/files/duplicates');
@@ -93,10 +94,8 @@ const Duplicates = () => {
 
   return (
       <div>
-          <Typography variant="h4" gutterBottom>
-              Duplicate Files
-          </Typography>
-          {data.map((group, index) => (
+        <NavHeader pageName="Duplicate Files"/>
+        {data.map((group, index) => (
               <TableContainer component={Paper} key={index} style={{marginBottom: '20px'}}>
                   <Typography variant="h6" style={{padding: '10px'}}>
                       Group {index + 1}
@@ -154,15 +153,12 @@ const Duplicates = () => {
                   </Table>
               </TableContainer>
           ))}
-          <div style={{margin: '20px'}}>
-              <label>
-                  <input
-                      type="checkbox"
-                      checked={archive}
-                      onChange={() => setArchive((prev) => !prev)}
-                  />
-                  Archive directory after moving
-              </label>
+          <div style={{margin: '20px', display: 'flex', alignItems: 'center'}}>
+              <Checkbox
+                  checked={archive}
+                  onChange={() => setArchive((prev) => !prev)}
+              />
+              <Typography variant="body1">Archive directory after moving files</Typography>
           </div>
           <Button
               variant="contained"

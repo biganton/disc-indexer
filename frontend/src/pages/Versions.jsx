@@ -13,6 +13,8 @@ import {
   Checkbox,
 } from '@mui/material';
 import { openFile, handleDelete } from '../actions/fileActions.js';
+import {Link} from "react-router-dom";
+import NavHeader from "../components/NavHeader.jsx";
 
 const fetchVersions = async () => {
   const res = await fetch('http://localhost:8080/files/versions?threshold=3');
@@ -30,6 +32,7 @@ const Versions = () => {
 
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [archive, setArchive] = useState(false);
+  const [targetDirectoryPath, setTargetDirectoryPath] = useState('');
 
   const toggleFileSelection = (fileId) => {
     setSelectedFiles((prevSelected) =>
@@ -94,10 +97,8 @@ const Versions = () => {
 
   return (
       <div>
-          <Typography variant="h4" gutterBottom>
-              File Versions
-          </Typography>
-          {data.map((group, index) => (
+        <NavHeader pageName="File Versions"/>
+        {data.map((group, index) => (
               <TableContainer component={Paper} key={index} style={{marginBottom: '20px'}}>
                   <Typography variant="h6" style={{padding: '10px'}}>
                       Group {index + 1}
@@ -155,15 +156,12 @@ const Versions = () => {
                   </Table>
               </TableContainer>
           ))}
-          <div style={{margin: '20px'}}>
-              <label>
-                  <input
-                      type="checkbox"
-                      checked={archive}
-                      onChange={() => setArchive((prev) => !prev)}
-                  />
-                  Archive directory after moving
-              </label>
+          <div style={{margin: '20px', display: 'flex', alignItems: 'center'}}>
+              <Checkbox
+                  checked={archive}
+                  onChange={() => setArchive((prev) => !prev)}
+              />
+              <Typography variant="body1">Archive directory after moving files</Typography>
           </div>
           <Button
               variant="contained"
@@ -171,9 +169,10 @@ const Versions = () => {
               style={{margin: '10px'}}
               onClick={() => {
                   const targetDirectoryPath = prompt('Enter target directory path:');
-                  const threshold = parseInt(prompt('Enter threshold value (default: 3):'), 10) || 3;
                   if (targetDirectoryPath) {
-                      handleMoveToGroupedDirectories(targetDirectoryPath, threshold, archive);
+                      handleMoveToGroupedDirectories(targetDirectoryPath, 3, archive);
+                  } else {
+                      alert('Please enter a valid directory path.');
                   }
               }}
           >

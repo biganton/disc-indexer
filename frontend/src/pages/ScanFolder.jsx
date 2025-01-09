@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { scanFolder } from "../api/api";
 import { Button, TextField, Typography, Container } from "@mui/material";
+import {Link} from "react-router-dom";
+import NavHeader from "../components/NavHeader.jsx";
 
 const ScanFolder = () => {
   const [folderPath, setFolderPath] = useState("");
@@ -16,8 +18,9 @@ const ScanFolder = () => {
   };
 
   return (
-    <Container>
-      <Typography variant="h4">Scan Folder</Typography>
+    <div>
+      <NavHeader pageName="Scan Folder"/>
+      <Container style={{ marginLeft: '0', marginRight: 'auto', marginTop: '40px' }}>
       <TextField
         label="Folder Path"
         fullWidth
@@ -27,8 +30,10 @@ const ScanFolder = () => {
       />
       <Button variant="contained" onClick={handleScan}>Scan</Button>
       {message && <Typography variant="body1">{message}</Typography>}
-    </Container>
-  );
+      </Container>
+    </div>
+    )
+    ;
 };
 
 export default ScanFolder;

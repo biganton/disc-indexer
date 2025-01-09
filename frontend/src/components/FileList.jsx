@@ -2,6 +2,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Typography, } from '@mui/material';
 import { openFile, handleDelete } from '../actions/fileActions.js';
+import NavHeader from "./NavHeader.jsx";
 
 const fetchFiles = async () => {
   const res = await fetch('http://localhost:8080/files/all');
@@ -12,9 +13,9 @@ const fetchFiles = async () => {
 };
 
 const FileList = () => {
-  const { data, error, isLoading } = useQuery({
-    queryKey: ['files'], // Unique identifier for this query
-    queryFn: fetchFiles, // Function that fetches the data
+  const { data, error, isLoading, refetch } = useQuery({
+    queryKey: ['files'],
+    queryFn: fetchFiles,
   });
 
   if (isLoading) {
@@ -26,10 +27,9 @@ const FileList = () => {
   }
 
   return (
-    <TableContainer component={Paper}>
-      <Typography variant="h4" gutterBottom>
-       All Files
-    </Typography>
+      <div>
+      <NavHeader pageName="All Files"/>
+      <TableContainer component={Paper}>
       <Table>
         <TableHead>
           <TableRow>
@@ -69,12 +69,13 @@ const FileList = () => {
                     >
                       Delete
                     </Button>
-                  </TableCell>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
     </TableContainer>
+      </div>
   );
 };
 
