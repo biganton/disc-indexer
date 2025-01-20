@@ -94,11 +94,11 @@ public class ActionLogService {
             case "MOVE_FILES":
                 File destinationPath = new File(retrievedLog.getTargetPath());
                 String sourcePath = retrievedLog.getFilePath();
-                if (destinationPath.exists() && !destinationPath.exists()) {
+                if (destinationPath.exists() && !new File(sourcePath).exists()) {
                     Files.copy(Path.of(retrievedLog.getTargetPath()), Path.of(sourcePath));
-                }
-                else {
-                    new IOException("Failed to revert action: " + retrievedLog.getActionType());
+                    Files.delete(Path.of(retrievedLog.getTargetPath()));
+                } else {
+                    throw new IOException("Failed to revert action: " + retrievedLog.getActionType());
                 }
                 break;
             default:
