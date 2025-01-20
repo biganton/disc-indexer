@@ -136,15 +136,13 @@ class ActionLogServiceTest {
     }
 
     @Test
-    void shouldLogDeleteFileFailure() throws IOException {
+    void shouldLogDeleteFileFailure() {
         // given
         String fileId = "12345";
         when(fileRepository.findById(fileId)).thenReturn(Optional.empty());
 
         // when
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            actionLogService.logDeleteFile(fileId);
-        });
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> actionLogService.logDeleteFile(fileId));
 
         // then
         assertEquals("File not found: " + fileId, exception.getMessage());

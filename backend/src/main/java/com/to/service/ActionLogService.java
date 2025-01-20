@@ -6,7 +6,6 @@ import com.to.model.ActionLog;
 import com.to.model.FileDocument;
 import com.to.repository.ActionLogRepository;
 import com.to.repository.FileRepository;
-import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -17,13 +16,12 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ActionLogService {
     private final ActionLogRepository actionLogRepository;
     private final FileRepository fileRepository;
-    private FileProcessingService fileProcessingService;
+    private final FileProcessingService fileProcessingService;
 
     public ActionLogService(ActionLogRepository actionLogRepository, FileRepository fileRepository, FileProcessingService fileProcessingService) {
         this.actionLogRepository = actionLogRepository;
@@ -78,7 +76,7 @@ public class ActionLogService {
         actionLog.setTargetPath(targetDirectoryPath);
         actionLog.setTimestamp(LocalDateTime.now());
         actionLog.setStatus(isSuccessful ? ActionStatus.SUCCESS.toString(): ActionStatus.FAILURE.toString());
-        actionLog.setArchived(isArchived ? true : false);
+        actionLog.setArchived(isArchived);
         actionLogRepository.save(actionLog);
     }
 
