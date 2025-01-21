@@ -40,6 +40,17 @@ public class FileProcessingService {
         }
     }
 
+    public void processFile(String filePath) throws IOException, NoSuchAlgorithmException {
+        File file = new File(filePath);
+
+        if (file.isDirectory()) {
+            processDirectory(file);
+        } else {
+            FileDocument fileDocument = createFileDocument(file);
+            fileRepository.save(fileDocument);
+        }
+    }
+
     private FileDocument createFileDocument(File file) throws IOException, NoSuchAlgorithmException {
         FileDocument document = new FileDocument();
         document.setFileName(file.getName());

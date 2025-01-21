@@ -1,5 +1,6 @@
 package com.to.service;
 
+import com.to.logic.ActionStatus;
 import com.to.logic.ZipArchiver;
 import com.to.model.FileDocument;
 import com.to.repository.FileRepository;
@@ -11,9 +12,11 @@ import java.util.List;
 @Service
 public class FileManagementService {
     private final FileRepository fileRepository;
+    private final ActionLogService actionLogService;
 
-    public FileManagementService(FileRepository fileRepository) {
+    public FileManagementService(FileRepository fileRepository, ActionLogService actionLogService) {
         this.fileRepository = fileRepository;
+        this.actionLogService = actionLogService;
     }
 
     public void deleteAllFiles() {
@@ -22,12 +25,12 @@ public class FileManagementService {
 
     public void openFile(String filePath) throws IOException {
         if (filePath == null || filePath.isEmpty()) {
-            throw new IllegalArgumentException("File path is required");
+            throw new IOException("File path is required");
         }
 
         File file = new File(filePath);
         if (!file.exists()) {
-            throw new IllegalArgumentException("File does not exist: " + filePath);
+            throw new IOException("File does not exist: " + filePath);
         }
 
         String os = System.getProperty("os.name").toLowerCase();
@@ -45,12 +48,16 @@ public class FileManagementService {
     public void deleteFile(String fileId) throws IOException {
         FileDocument fileDocument = fileRepository.findById(fileId).orElseThrow(() ->
                 new IllegalArgumentException("File not found: " + fileId));
+        actionLogService.logDeleteFile(fileId);
+
         File file = new File(fileDocument.getFilePath());
 
         if (file.exists() && !file.delete()) {
+            actionLogService.changeLogStatus(fileId, ActionStatus.FAILURE);
             throw new IOException("Failed to delete file from system");
         }
 
+        actionLogService.changeLogStatus(fileId, ActionStatus.SUCCESS);
         fileRepository.deleteById(fileId);
     }
 
@@ -69,8 +76,10 @@ public class FileManagementService {
             File newFile = new File(targetDirectoryPath, file.getName());
             if (file.renameTo(newFile)) {
                 fileDocument.setFilePath(newFile.getAbsolutePath());
+                actionLogService.logMoveFiles(file.getAbsolutePath(), newFile.getAbsolutePath(), true, false);
                 fileRepository.save(fileDocument);
             } else {
+                actionLogService.logMoveFiles(file.getAbsolutePath(), newFile.getAbsolutePath(), false, false);
                 throw new IOException("Failed to move file: " + file.getAbsolutePath());
             }
         }
@@ -103,8 +112,10 @@ public class FileManagementService {
     public void archiveDirectory(String directoryPath, String targetDirectoryPath) {
         ZipArchiver zipArchiver = new ZipArchiver();
         try {
+            actionLogService.logMoveFiles(directoryPath, targetDirectoryPath, true, true);
             zipArchiver.zipFolderAndDeleteOriginal(directoryPath, targetDirectoryPath);
         } catch (IOException e) {
+            actionLogService.changeLogStatus(directoryPath, ActionStatus.FAILURE);
             throw new RuntimeException(e);
         }
     }

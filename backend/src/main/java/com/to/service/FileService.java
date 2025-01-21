@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
@@ -14,11 +15,13 @@ public class FileService {
     private final FileProcessingService fileProcessingService;
     private final FileManagementService fileManagementService;
     private final FileAnalysisService fileAnalysisService;
+    private final ActionLogService actionLogService;
 
-    public FileService(FileProcessingService fileProcessingService, FileManagementService fileManagementService, FileAnalysisService fileAnalysisService) {
+    public FileService(FileProcessingService fileProcessingService, FileManagementService fileManagementService, FileAnalysisService fileAnalysisService, ActionLogService actionLogService) {
         this.fileProcessingService = fileProcessingService;
         this.fileManagementService = fileManagementService;
         this.fileAnalysisService = fileAnalysisService;
+        this.actionLogService = actionLogService;
     }
 
     public void processDirectory(String directoryPath) throws IOException, NoSuchAlgorithmException {
@@ -48,7 +51,13 @@ public class FileService {
     }
 
     public void openFile(String filePath) throws IOException {
-        fileManagementService.openFile(filePath);
+        try {
+            fileManagementService.openFile(filePath);
+        } catch (IOException e) {
+            actionLogService.logOpenFile(filePath, false);
+            throw e;
+        }
+        actionLogService.logOpenFile(filePath, true);
     }
 
     public void deleteFile(String fileId) throws IOException {

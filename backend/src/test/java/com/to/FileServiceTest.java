@@ -2,10 +2,7 @@ package com.to;
 
 import com.to.model.FileDocument;
 import com.to.repository.FileRepository;
-import com.to.service.FileAnalysisService;
-import com.to.service.FileManagementService;
-import com.to.service.FileProcessingService;
-import com.to.service.FileService;
+import com.to.service.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,8 +43,8 @@ class FileServiceTest {
     void setUp() {
         FileAnalysisService fileAnalysisService = Mockito.spy(new FileAnalysisService(fileRepository));
         FileProcessingService fileProcessingService = Mockito.spy(new FileProcessingService(fileRepository));
-        FileManagementService fileManagementService = Mockito.spy(new FileManagementService(fileRepository));
-        fileService = new FileService(fileProcessingService, fileManagementService, fileAnalysisService);
+        FileManagementService fileManagementService = Mockito.spy(new FileManagementService(fileRepository, Mockito.mock(ActionLogService.class)));
+        fileService = new FileService(fileProcessingService, fileManagementService, fileAnalysisService, Mockito.mock(ActionLogService.class));
     }
 
     @AfterEach
