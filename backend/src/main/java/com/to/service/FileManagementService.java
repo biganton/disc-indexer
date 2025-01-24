@@ -48,7 +48,7 @@ public class FileManagementService {
     public void deleteFile(String fileId) throws IOException {
         FileDocument fileDocument = fileRepository.findById(fileId).orElseThrow(() ->
                 new IllegalArgumentException("File not found: " + fileId));
-        actionLogService.logDeleteFile(fileId);
+        String logId = actionLogService.logDeleteFile(fileId);
 
         File file = new File(fileDocument.getFilePath());
 
@@ -57,7 +57,7 @@ public class FileManagementService {
             throw new IOException("Failed to delete file from system");
         }
 
-        actionLogService.changeLogStatus(fileId, ActionStatus.SUCCESS);
+        actionLogService.changeLogStatus(logId, ActionStatus.SUCCESS);
         fileRepository.deleteById(fileId);
     }
 

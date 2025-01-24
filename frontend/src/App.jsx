@@ -6,6 +6,7 @@ import ScanFolder from "./pages/ScanFolder";
 import Duplicates from "./pages/Duplicates";
 import Versions from "./pages/Versions";
 import Largest from "./pages/Largest";
+import LogList from "./pages/LogList";
 
 const App = () => {
   return (
@@ -16,7 +17,8 @@ const App = () => {
         <Route path="/scan" element={<ScanFolder />} />
         <Route path="/duplicates" element={<Duplicates />} />
         <Route path="/versions" element={<Versions />} />
-          <Route path="/largest" element={<Largest />} />
+        <Route path="/largest" element={<Largest />} />
+        <Route path="/logs" element={<LogList />} />
       </Routes>
     </Router>
   );
