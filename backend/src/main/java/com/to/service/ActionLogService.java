@@ -16,6 +16,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ActionLogService {
@@ -88,6 +89,7 @@ public class ActionLogService {
                 byte[] decodedContent = Base64.getDecoder().decode(retrievedLog.getFileContentBase64());
                 Files.write(Path.of(retrievedLog.getFilePath()), decodedContent);
                 fileProcessingService.processFile(retrievedLog.getFilePath());
+                changeLogStatus(actionLogId, ActionStatus.REVERTED);
                 break;
             case "MOVE_FILES":
                 File destinationPath = new File(retrievedLog.getTargetPath());
@@ -95,6 +97,15 @@ public class ActionLogService {
                 if (destinationPath.exists() && !new File(sourcePath).exists()) {
                     Files.copy(Path.of(retrievedLog.getTargetPath()), Path.of(sourcePath));
                     Files.delete(Path.of(retrievedLog.getTargetPath()));
+                    changeLogStatus(actionLogId, ActionStatus.REVERTED);
+                    Optional<FileDocument> file = fileRepository.findByFilePath(retrievedLog.getTargetPath());
+                    if (file.isPresent()) {
+                        FileDocument existingFile = file.get();
+                        existingFile.setFilePath(sourcePath);
+                        existingFile.setLastModified(LocalDateTime.now());
+                        fileRepository.save(existingFile);
+                    }
+
                 } else {
                     throw new IOException("Failed to revert action: " + retrievedLog.getActionType());
                 }

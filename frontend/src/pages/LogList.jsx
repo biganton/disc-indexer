@@ -20,7 +20,7 @@ const fetchLogs = async () => {
   return res.json();
 };
 
-const revertAction = async (id) => {
+const revertAction = async (id, refetch) => {
   try {
     const res = await fetch('http://localhost:8080/logs/revert', {
       method: 'POST',
@@ -33,6 +33,7 @@ const revertAction = async (id) => {
       throw new Error('Failed to revert action');
     }
     alert('Action reverted successfully');
+    refetch()
   } catch (error) {
     alert(`Error: ${error.message}`);
   }
@@ -71,7 +72,7 @@ const Logs = () => {
           </TableHead>
           <TableBody>
             {data
-              .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) // Sort logs by newest first
+              .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
               .map((log) => (
                 <TableRow key={log.id}>
                   <TableCell>{log.id}</TableCell>
@@ -84,12 +85,12 @@ const Logs = () => {
                   <TableCell>{log.status}</TableCell>
                   <TableCell>{log.errorMessage || '-'}</TableCell>
                   <TableCell>
-                    {['DELETE_FILE', 'MOVE_FILES'].includes(log.actionType) && (
+                    {['DELETE_FILE', 'MOVE_FILES'].includes(log.actionType) && log.status !== 'REVERTED' && (
                       <Button
                         variant="contained"
                         color="primary"
                         style={{ margin: '10px' }}
-                        onClick={() => revertAction(log.id)}
+                        onClick={() => revertAction(log.id, refetch)}
                       >
                         Revert
                       </Button>
