@@ -26,6 +26,7 @@ public class FileService {
 
     public void processDirectory(String directoryPath) throws IOException, NoSuchAlgorithmException {
         fileManagementService.deleteAllFiles();
+        actionLogService.deleteAllLogs();
         File directory = new File(directoryPath);
         fileProcessingService.processDirectory(directory);
     }
