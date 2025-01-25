@@ -36,6 +36,10 @@ public class ActionLogService {
         return actionLogRepository.findAll();
     }
 
+    public void deleteAllLogs(){
+        actionLogRepository.deleteAll();
+    }
+
     public void logOpenFile(String filePath, boolean isSuccessful) {
         ActionLog actionLog = new ActionLog();
         actionLog.setActionType(String.valueOf(ActionType.OPEN_FILE));
