@@ -3,11 +3,10 @@ package com.to.controller;
 import com.to.service.ActionLogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/logs")
@@ -26,6 +25,20 @@ public class LogController {
     )
     public List<?> getAllLogs() {
         return actionLogService.getAllActionLogs();
+    }
+
+    @PostMapping("/revert")
+    @Operation(
+            summary = "Revert an action",
+            description = "Reverts an action based on the provided log ID in the request body."
+    )
+    public void revertAction(@RequestBody Map<String, String> request) {
+        String logId = request.get("id");
+        try {
+            actionLogService.revertAction(logId);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to revert action: " + e.getMessage(), e);
+        }
     }
 
 }

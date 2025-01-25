@@ -48,7 +48,7 @@ public class FileManagementService {
     public void deleteFile(String fileId) throws IOException {
         FileDocument fileDocument = fileRepository.findById(fileId).orElseThrow(() ->
                 new IllegalArgumentException("File not found: " + fileId));
-        actionLogService.logDeleteFile(fileId);
+        String logId = actionLogService.logDeleteFile(fileId);
 
         File file = new File(fileDocument.getFilePath());
 
@@ -57,7 +57,7 @@ public class FileManagementService {
             throw new IOException("Failed to delete file from system");
         }
 
-        actionLogService.changeLogStatus(fileId, ActionStatus.SUCCESS);
+        actionLogService.changeLogStatus(logId, ActionStatus.SUCCESS);
         fileRepository.deleteById(fileId);
     }
 
@@ -111,11 +111,12 @@ public class FileManagementService {
 
     public void archiveDirectory(String directoryPath, String targetDirectoryPath) {
         ZipArchiver zipArchiver = new ZipArchiver();
+        String logId = null;
         try {
-            actionLogService.logMoveFiles(directoryPath, targetDirectoryPath, true, true);
+            logId = actionLogService.logArchiveFiles(directoryPath, targetDirectoryPath, true, true);
             zipArchiver.zipFolderAndDeleteOriginal(directoryPath, targetDirectoryPath);
         } catch (IOException e) {
-            actionLogService.changeLogStatus(directoryPath, ActionStatus.FAILURE);
+            actionLogService.changeLogStatus(logId, ActionStatus.FAILURE);
             throw new RuntimeException(e);
         }
     }

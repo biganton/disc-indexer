@@ -24,6 +24,10 @@ const NavHeader = ({ pageName }) => {
         <Button component={Link} to="/largest" variant="contained" color="success" style={{ marginLeft: "10px" }}>
           Find Largest Files
         </Button>
+        <Button component={Link} to="/logs" variant="contained" color="error" style={{ marginLeft: "10px" }}>
+          View Logs
+        </Button>
+
       </nav>
       <Typography variant="h4" gutterBottom style={{ marginTop: '20px' }}>
         {pageName}
