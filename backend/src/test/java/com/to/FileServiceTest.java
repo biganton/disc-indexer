@@ -44,7 +44,8 @@ class FileServiceTest {
         FileAnalysisService fileAnalysisService = Mockito.spy(new FileAnalysisService(fileRepository));
         FileProcessingService fileProcessingService = Mockito.spy(new FileProcessingService(fileRepository));
         FileManagementService fileManagementService = Mockito.spy(new FileManagementService(fileRepository, Mockito.mock(ActionLogService.class)));
-        fileService = new FileService(fileProcessingService, fileManagementService, fileAnalysisService, Mockito.mock(ActionLogService.class));
+        KeyWordsService keyWordsService = Mockito.spy(new KeyWordsService(fileRepository));
+        fileService = new FileService(fileProcessingService, fileManagementService, fileAnalysisService, Mockito.mock(ActionLogService.class), keyWordsService);
     }
 
     @AfterEach

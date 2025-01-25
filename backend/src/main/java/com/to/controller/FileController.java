@@ -211,4 +211,18 @@ public class FileController {
             return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
     }
+
+    @GetMapping("/search")
+    @Operation(
+            summary = "Search for files by keyword",
+            description = "Searches the database for files containing the specified keyword in their content. Only text-based files are considered."
+    )
+    public ResponseEntity<List<FileDocument>> searchFilesByKeyword(@RequestParam String keyword) {
+        try {
+            List<FileDocument> results = fileService.searchFilesByKeyword(keyword);
+            return ResponseEntity.ok(results);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
 }
