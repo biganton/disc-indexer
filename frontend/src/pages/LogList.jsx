@@ -66,7 +66,6 @@ const Logs = () => {
               <TableCell>Target Path</TableCell>
               <TableCell>Timestamp</TableCell>
               <TableCell>Status</TableCell>
-              <TableCell>Error Message</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -83,9 +82,8 @@ const Logs = () => {
                     {new Date(log.timestamp).toLocaleString()}
                   </TableCell>
                   <TableCell>{log.status}</TableCell>
-                  <TableCell>{log.errorMessage || '-'}</TableCell>
                   <TableCell>
-                    {['DELETE_FILE', 'MOVE_FILES'].includes(log.actionType) && log.status !== 'REVERTED' && (
+                    {['DELETE_FILE', 'MOVE_FILES', 'ARCHIVE_FILES'].includes(log.actionType) && log.status !== 'REVERTED' && (
                       <Button
                         variant="contained"
                         color="primary"

@@ -111,11 +111,12 @@ public class FileManagementService {
 
     public void archiveDirectory(String directoryPath, String targetDirectoryPath) {
         ZipArchiver zipArchiver = new ZipArchiver();
+        String logId = null;
         try {
-            actionLogService.logMoveFiles(directoryPath, targetDirectoryPath, true, true);
+            logId = actionLogService.logArchiveFiles(directoryPath, targetDirectoryPath, true, true);
             zipArchiver.zipFolderAndDeleteOriginal(directoryPath, targetDirectoryPath);
         } catch (IOException e) {
-            actionLogService.changeLogStatus(directoryPath, ActionStatus.FAILURE);
+            actionLogService.changeLogStatus(logId, ActionStatus.FAILURE);
             throw new RuntimeException(e);
         }
     }

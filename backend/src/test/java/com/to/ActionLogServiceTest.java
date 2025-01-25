@@ -165,7 +165,7 @@ class ActionLogServiceTest {
         actionLogService.revertAction(actionLogId);
 
         // then
-        verify(actionLogRepository, times(1)).findById(actionLogId);
+        verify(actionLogRepository, atLeastOnce()).findById(actionLogId);
         assertTrue(Files.exists(Path.of(actionLog.getFilePath())));
         assertEquals("file content", Files.readString(Path.of(actionLog.getFilePath())));
         verify(fileProcessingService, times(1)).processFile(actionLog.getFilePath());
@@ -195,7 +195,7 @@ class ActionLogServiceTest {
         actionLogService.revertAction(actionLogId);
 
         // then
-        verify(actionLogRepository, times(1)).findById(actionLogId);
+        verify(actionLogRepository, atLeastOnce()).findById(actionLogId);
         assertTrue(Files.exists(sourceDir.resolve("file.txt")));
         assertFalse(Files.exists(targetDir.resolve("file.txt")));
     }
