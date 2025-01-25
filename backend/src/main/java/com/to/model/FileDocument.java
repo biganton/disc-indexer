@@ -1,9 +1,9 @@
 package com.to.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.TextIndexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Document(collection = "files")
@@ -16,6 +16,8 @@ public class FileDocument {
     private String hash;
     private LocalDateTime createdAt;
     private LocalDateTime lastModified;
+    @TextIndexed
+    private String content;
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
@@ -31,4 +33,6 @@ public class FileDocument {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getLastModified() { return lastModified; }
     public void setLastModified(LocalDateTime lastModified) { this.lastModified = lastModified; }
+    public String getContent() { return content; }
+    public void setContent(String content) { this.content = content; }
 }

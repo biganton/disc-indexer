@@ -14,6 +14,8 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
 
 @Service
 public class FileProcessingService {
@@ -51,12 +53,42 @@ public class FileProcessingService {
         }
     }
 
+    public String extractTextFromPdf(File file) throws IOException {
+        try (PDDocument document = PDDocument.load(file)) {
+            if (document.isEncrypted()) {
+                throw new IOException("The PDF is encrypted and cannot be processed.");
+            }
+            PDFTextStripper pdfStripper = new PDFTextStripper();
+            return pdfStripper.getText(document);
+        }
+    }
+
     private FileDocument createFileDocument(File file) throws IOException, NoSuchAlgorithmException {
         FileDocument document = new FileDocument();
         document.setFileName(file.getName());
         document.setFilePath(file.getAbsolutePath());
         document.setSize(file.length());
         document.setHash(computeFileHash(file));
+
+        if (file.getName().toLowerCase().endsWith(".txt")
+                || file.getName().toLowerCase().endsWith(".md")
+                || file.getName().toLowerCase().endsWith(".csv")
+                || file.getName().toLowerCase().endsWith(".json")) {
+            String content = new String(Files.readAllBytes(file.toPath()));
+            document.setContent(content);
+        }
+        else if(file.getName().toLowerCase().endsWith(".pdf")) {
+            try {
+                String content = extractTextFromPdf(file);
+                document.setContent(content);
+            } catch (IOException e) {
+                System.err.println("Failed to extract text from PDF: " + file.getName());
+                document.setContent(null);
+            }
+
+        }else {
+            document.setContent(null);
+        }
 
         BasicFileAttributes attrs = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
         document.setCreatedAt(convertInstantToLocalDateTime(attrs.creationTime().toInstant()));

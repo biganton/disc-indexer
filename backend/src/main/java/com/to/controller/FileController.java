@@ -120,6 +120,9 @@ public class FileController {
             summary = "Move duplicate files to grouped directories",
             description = "Moves each group of duplicate files to its own directory under the target path."
     )
+    @ApiResponse(responseCode = "200", description = "Duplicates moved to grouped directories successfully.")
+    @ApiResponse(responseCode = "400", description = "Bad request. Missing or invalid input parameters.")
+    @ApiResponse(responseCode = "500", description = "Internal server error.")
     public ResponseEntity<String> moveDuplicatesToGroupedDirectories(@RequestBody Map<String, Object> request) {
         String targetDirectoryPath = (String) request.get("targetDirectoryPath");
         Boolean archive = (Boolean) request.get("archive");
@@ -146,6 +149,9 @@ public class FileController {
             summary = "Move file versions to grouped directories",
             description = "Moves each group of file versions to its own directory under the target path."
     )
+    @ApiResponse(responseCode = "200", description = "Versions moved to grouped directories successfully.")
+    @ApiResponse(responseCode = "400", description = "Bad request. Missing or invalid input parameters.")
+    @ApiResponse(responseCode = "500", description = "Internal server error.")
     public ResponseEntity<String> moveVersionsToGroupedDirectories(@RequestBody Map<String, Object> request) {
         String targetDirectoryPath = (String) request.get("targetDirectoryPath");
         Integer threshold = (Integer) request.getOrDefault("threshold", 3);
@@ -174,6 +180,9 @@ public class FileController {
             summary = "Move selected files to a grouped directory",
             description = "Moves the selected files to a specified directory. Optionally archives the directory."
     )
+    @ApiResponse(responseCode = "200", description = "Files moved successfully.")
+    @ApiResponse(responseCode = "400", description = "Bad request. Missing required fields: fileIds or targetDirectoryPath.")
+    @ApiResponse(responseCode = "500", description = "Internal server error.")
     public ResponseEntity<String> moveSelectedFilesToDirectory(
             @RequestBody Map<String, Object> request) {
 
@@ -203,12 +212,30 @@ public class FileController {
     summary = "Archives files",
     description = "Archives files from some directory into new path"
     )
+    @ApiResponse(responseCode = "200", description = "The directory has been archived successfully.")
+    @ApiResponse(responseCode = "500", description = "Internal server error.")
     public ResponseEntity<String> archiveDirectory(@RequestParam String directoryPath, @RequestParam String targetDirectoryPath) {
         try {
             fileService.archiveDirectory(directoryPath);
             return ResponseEntity.ok("The directory has been archived!");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/search")
+    @Operation(
+            summary = "Search for files by keyword",
+            description = "Searches the database for files containing the specified keyword in their content. Only text-based files are considered."
+    )
+    @ApiResponse(responseCode = "200", description = "Search results returned successfully.")
+    @ApiResponse(responseCode = "500", description = "Internal server error.")
+    public ResponseEntity<List<FileDocument>> searchFilesByKeyword(@RequestParam String keyword) {
+        try {
+            List<FileDocument> results = fileService.searchFilesByKeyword(keyword);
+            return ResponseEntity.ok(results);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
         }
     }
 }

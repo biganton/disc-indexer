@@ -16,12 +16,14 @@ public class FileService {
     private final FileManagementService fileManagementService;
     private final FileAnalysisService fileAnalysisService;
     private final ActionLogService actionLogService;
+    private final KeyWordsService keyWordsService;
 
-    public FileService(FileProcessingService fileProcessingService, FileManagementService fileManagementService, FileAnalysisService fileAnalysisService, ActionLogService actionLogService) {
+    public FileService(FileProcessingService fileProcessingService, FileManagementService fileManagementService, FileAnalysisService fileAnalysisService, ActionLogService actionLogService, KeyWordsService keyWordsService) {
         this.fileProcessingService = fileProcessingService;
         this.fileManagementService = fileManagementService;
         this.fileAnalysisService = fileAnalysisService;
         this.actionLogService = actionLogService;
+        this.keyWordsService = keyWordsService;
     }
 
     public void processDirectory(String directoryPath) throws IOException, NoSuchAlgorithmException {
@@ -82,4 +84,7 @@ public class FileService {
         fileManagementService.archiveDirectory(directoryPath, directoryPath + ".zip");
     }
 
+    public List<FileDocument> searchFilesByKeyword(String keyword){
+        return keyWordsService.searchFilesByKeyword(keyword);
+    }
 }
