@@ -16,12 +16,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Optional;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -198,5 +201,82 @@ class ActionLogServiceTest {
         verify(actionLogRepository, atLeastOnce()).findById(actionLogId);
         assertTrue(Files.exists(sourceDir.resolve("file.txt")));
         assertFalse(Files.exists(targetDir.resolve("file.txt")));
+    }
+
+
+    @Test
+    void shouldLogMoveFilesSuccessfully() {
+        // given
+        String sourceDirectoryPath = tempDir.resolve("sourceDir").toString();
+        String targetDirectoryPath = tempDir.resolve("targetDir").toString();
+        boolean isSuccessful = true;
+        boolean isArchived = false;
+
+        // when
+        String logId = actionLogService.logMoveFiles(sourceDirectoryPath, targetDirectoryPath, isSuccessful, isArchived);
+
+        // then
+        ArgumentCaptor<ActionLog> actionLogCaptor = ArgumentCaptor.forClass(ActionLog.class);
+        verify(actionLogRepository, times(1)).save(actionLogCaptor.capture());
+
+        ActionLog savedLog = actionLogCaptor.getValue();
+        assertEquals(sourceDirectoryPath, savedLog.getFilePath());
+        assertEquals(targetDirectoryPath, savedLog.getTargetPath());
+        assertEquals(ActionStatus.SUCCESS.toString(), savedLog.getStatus());
+        assertEquals(String.valueOf(ActionType.MOVE_FILES), savedLog.getActionType());
+        assertFalse(savedLog.isArchived());
+    }
+
+    @Test
+    void shouldLogArchiveFilesSuccessfully() {
+        // given
+        String sourceDirectoryPath = tempDir.resolve("sourceDir").toString();
+        String targetDirectoryPath = tempDir.resolve("targetDir").toString();
+        boolean isSuccessful = true;
+        boolean isArchived = true;
+
+        // when
+        String logId = actionLogService.logArchiveFiles(sourceDirectoryPath, targetDirectoryPath, isSuccessful, isArchived);
+
+        // then
+        ArgumentCaptor<ActionLog> actionLogCaptor = ArgumentCaptor.forClass(ActionLog.class);
+        verify(actionLogRepository, times(1)).save(actionLogCaptor.capture());
+
+        ActionLog savedLog = actionLogCaptor.getValue();
+        assertEquals(sourceDirectoryPath, savedLog.getFilePath());
+        assertEquals(targetDirectoryPath, savedLog.getTargetPath());
+        assertEquals(ActionStatus.SUCCESS.toString(), savedLog.getStatus());
+        assertEquals(String.valueOf(ActionType.ARCHIVE_FILES), savedLog.getActionType());
+        assertTrue(savedLog.isArchived());
+    }
+
+    @Test
+    void shouldRevertArchiveFilesAction() throws IOException, NoSuchAlgorithmException {
+        // given
+        String actionLogId = "log125";
+        ActionLog actionLog = new ActionLog();
+        actionLog.setId(actionLogId);
+        actionLog.setActionType("ARCHIVE_FILES");
+        actionLog.setFilePath(tempDir.resolve("targetDir").toString());
+        actionLog.setTargetPath(tempDir.resolve("archive.zip").toString());
+
+        Path zipFilePath = Path.of(actionLog.getTargetPath());
+        try (FileOutputStream fos = new FileOutputStream(zipFilePath.toFile());
+            ZipOutputStream zos = new ZipOutputStream(fos)) {
+            ZipEntry zipEntry = new ZipEntry("file.txt");
+            zos.putNextEntry(zipEntry);
+            zos.write("file content".getBytes());
+            zos.closeEntry();
+        }
+
+        when(actionLogRepository.findById(actionLogId)).thenReturn(Optional.of(actionLog));
+
+        // when
+        actionLogService.revertAction(actionLogId);
+
+        // then
+        verify(actionLogRepository, atLeastOnce()).findById(actionLogId);
+        assertTrue(Files.exists(Path.of(actionLog.getFilePath(), "file.txt")));
+        assertFalse(Files.exists(zipFilePath));
     }
 }
